@@ -13,8 +13,9 @@ public class FileScanner
 {
     // Pattern: {device}-{buildnum}.{date}.{time}.{ext}
     // Example: gpn600_001-AAL-AA-07009-01.20260130.062740.zip
+    // Device is before first dash, buildnum is everything between first dash and date
     private static readonly Regex FileNamePattern = new(
-        @"^(?<device>[^.]+)-(?<buildnum>[^.]+)\.(?<date>\d{8})\.(?<time>\d+)\.(?<ext>zip|json)$",
+        @"^(?<device>[^-]+)-(?<buildnum>.+?)\.(?<date>\d{8})\.(?<time>\d+)\.(?<ext>zip|json)$",
         RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
     public List<BuildFile> ScanDirectory(string directoryPath)
@@ -115,7 +116,8 @@ public class FileScanner
             var parsed = ParseFileName(firstFile.FileName);
             if (parsed.HasValue)
             {
-                project.Device = parsed.Value.device;
+                // Transform device: gpn600_001 -> GPN600-001 (uppercase, underscore to dash)
+                project.Device = parsed.Value.device.Replace("_", "-").ToUpperInvariant();
                 // Set build number to include date and time: buildnum.date.time
                 project.BuildNumber = $"{parsed.Value.buildNumber}.{parsed.Value.date}.{parsed.Value.time}";
 
