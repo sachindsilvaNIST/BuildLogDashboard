@@ -13,8 +13,11 @@ namespace BuildLogDashboard.ViewModels;
 public partial class MainWindowViewModel : ViewModelBase
 {
     private readonly ProjectManager _projectManager;
+    private readonly HtmlGenerator _htmlGenerator;
+    private readonly PdfGenerator _pdfGenerator;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasWorkspaceLoaded))]
     private string _workspacePath = string.Empty;
 
     [ObservableProperty]
@@ -41,12 +44,21 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private string _statusMessage = "Ready";
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasWorkspaceLoaded))]
+    private bool _hasBuildsLoaded = false;
+
+    // Computed property for button enable state
+    public bool HasWorkspaceLoaded => HasBuildsLoaded || !string.IsNullOrEmpty(WorkspacePath);
+
     // For file dialog
     public IStorageProvider? StorageProvider { get; set; }
 
     public MainWindowViewModel()
     {
         _projectManager = new ProjectManager();
+        _htmlGenerator = new HtmlGenerator(_projectManager.MarkdownGenerator);
+        _pdfGenerator = new PdfGenerator();
     }
 
     partial void OnSelectedBuildChanged(BuildProject? value)
@@ -107,6 +119,7 @@ public partial class MainWindowViewModel : ViewModelBase
                         SelectedBuild = Builds[0];
                     }
 
+                    HasBuildsLoaded = Builds.Count > 0;
                     StatusMessage = $"Loaded {Builds.Count} build(s)";
                 });
             });
@@ -184,6 +197,89 @@ public partial class MainWindowViewModel : ViewModelBase
             try
             {
                 await _projectManager.ExportAsMarkdownAsync(SelectedBuild, file.Path.LocalPath);
+                StatusMessage = $"Exported to {file.Name}";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"Export failed: {ex.Message}";
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+    }
+
+    [RelayCommand]
+    private async Task ExportHtmlAsync()
+    {
+        if (SelectedBuild == null || StorageProvider == null) return;
+
+        var suggestedName = string.IsNullOrEmpty(SelectedBuild.BuildNumber)
+            ? "BUILD_LOG.html"
+            : $"BUILD_LOG_{SelectedBuild.BuildNumber}.html";
+
+        var file = await StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+        {
+            Title = "Export as HTML",
+            SuggestedFileName = suggestedName,
+            FileTypeChoices = new[]
+            {
+                new FilePickerFileType("HTML") { Patterns = new[] { "*.html" } }
+            }
+        });
+
+        if (file != null)
+        {
+            IsBusy = true;
+            StatusMessage = "Exporting HTML...";
+
+            try
+            {
+                SelectedBuild.LastUpdated = DateTime.Now;
+                var html = _htmlGenerator.Generate(SelectedBuild);
+                await System.IO.File.WriteAllTextAsync(file.Path.LocalPath, html);
+                StatusMessage = $"Exported to {file.Name}";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"Export failed: {ex.Message}";
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+    }
+
+    [RelayCommand]
+    private async Task ExportPdfAsync()
+    {
+        if (SelectedBuild == null || StorageProvider == null) return;
+
+        var suggestedName = string.IsNullOrEmpty(SelectedBuild.BuildNumber)
+            ? "BUILD_LOG.pdf"
+            : $"BUILD_LOG_{SelectedBuild.BuildNumber}.pdf";
+
+        var file = await StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+        {
+            Title = "Export as PDF",
+            SuggestedFileName = suggestedName,
+            FileTypeChoices = new[]
+            {
+                new FilePickerFileType("PDF") { Patterns = new[] { "*.pdf" } }
+            }
+        });
+
+        if (file != null)
+        {
+            IsBusy = true;
+            StatusMessage = "Exporting PDF...";
+
+            try
+            {
+                SelectedBuild.LastUpdated = DateTime.Now;
+                await Task.Run(() => _pdfGenerator.Generate(SelectedBuild, file.Path.LocalPath));
                 StatusMessage = $"Exported to {file.Name}";
             }
             catch (Exception ex)

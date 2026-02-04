@@ -13,9 +13,26 @@ public class BoolToBrushConverter : IValueConverter
     {
         if (value is bool boolValue && boolValue)
         {
-            return new SolidColorBrush(Color.Parse("#E6F2FF")); // Light blue when active
+            return new SolidColorBrush(Color.Parse("#007AFF")); // Apple blue when active
         }
         return Brushes.Transparent;
+    }
+
+    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+public class BoolToForegroundConverter : IValueConverter
+{
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        if (value is bool boolValue && boolValue)
+        {
+            return Brushes.White; // White when active
+        }
+        return new SolidColorBrush(Color.Parse("#1A1A1A")); // Dark text when inactive
     }
 
     public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)

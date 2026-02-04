@@ -12,6 +12,10 @@
     <Color x:Key="GlassSuccessColor">#107C10</Color>
     <Color x:Key="GlassWarningColor">#FF8C00</Color>
     <Color x:Key="GlassErrorColor">#D13438</Color>
+    <Color x:Key="GlassAppleBlueColor">#007AFF</Color>
+    <Color x:Key="GlassAppleGreenColor">#34C759</Color>
+    <Color x:Key="GlassAppleRedColor">#FF3B30</Color>
+    <Color x:Key="GlassAppleLightGrayColor">#E5E5EA</Color>
 
     <!-- Brushes -->
     <SolidColorBrush x:Key="GlassPrimaryBrush" Color="{StaticResource GlassPrimaryColor}" />
@@ -21,6 +25,11 @@
     <SolidColorBrush x:Key="GlassBorderBrush" Color="{StaticResource GlassBorderColor}" />
     <SolidColorBrush x:Key="GlassTextBrush" Color="{StaticResource GlassTextColor}" />
     <SolidColorBrush x:Key="GlassSubtleTextBrush" Color="{StaticResource GlassSubtleTextColor}" />
+    <SolidColorBrush x:Key="GlassSuccessBrush" Color="{StaticResource GlassSuccessColor}" />
+    <SolidColorBrush x:Key="GlassAppleBlueBrush" Color="{StaticResource GlassAppleBlueColor}" />
+    <SolidColorBrush x:Key="GlassAppleGreenBrush" Color="{StaticResource GlassAppleGreenColor}" />
+    <SolidColorBrush x:Key="GlassAppleRedBrush" Color="{StaticResource GlassAppleRedColor}" />
+    <SolidColorBrush x:Key="GlassAppleLightGrayBrush" Color="{StaticResource GlassAppleLightGrayColor}" />
 
     <!-- Semi-transparent panel for glass effect -->
     <SolidColorBrush x:Key="GlassPanelTranslucentBrush" Color="#F5FFFFFF" />

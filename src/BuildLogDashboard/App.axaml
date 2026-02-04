@@ -21,6 +21,7 @@
 
             <!-- Converters -->
             <local:BoolToBrushConverter x:Key="BoolToBrushConverter"/>
+            <local:BoolToForegroundConverter x:Key="BoolToForegroundConverter"/>
             <local:BoolToGridLengthConverter x:Key="BoolToGridLengthConverter"/>
         </ResourceDictionary>
     </Application.Resources>

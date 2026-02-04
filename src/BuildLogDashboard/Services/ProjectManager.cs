@@ -30,6 +30,7 @@ public class ProjectManager
     }
 
     public string? CurrentWorkspace { get; private set; }
+    public MarkdownGenerator MarkdownGenerator => _markdownGenerator;
 
     public void SetWorkspace(string directoryPath)
     {
