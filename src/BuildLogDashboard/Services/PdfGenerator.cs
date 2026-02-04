@@ -10,7 +10,7 @@ namespace BuildLogDashboard.Services;
 public class PdfGenerator
 {
     // Colors
-    private static readonly string PrimaryColor = "#007AFF";
+    private static readonly string HeadingColor = "#01548c";  // Blue for headings
     private static readonly string TextColor = "#1A1A1A";
     private static readonly string SubtleColor = "#666666";
     private static readonly string BorderColor = "#E0E0E0";
@@ -31,7 +31,7 @@ public class PdfGenerator
             {
                 page.Size(PageSizes.A4);
                 page.Margin(50);
-                page.DefaultTextStyle(x => x.FontSize(10).FontColor(TextColor));
+                page.DefaultTextStyle(x => x.FontSize(10).FontColor(TextColor).FontFamily("Inter"));
 
                 page.Header().Element(c => ComposeHeader(c, project));
                 page.Content().Element(c => ComposeContent(c, project));
@@ -44,9 +44,9 @@ public class PdfGenerator
     {
         container.Column(column =>
         {
-            column.Item().Text($"Android OS Image Build Log").FontSize(24).Bold().FontColor(PrimaryColor);
+            column.Item().Text($"Android OS Image Build Log").FontSize(24).Bold().FontColor(HeadingColor);
             column.Item().Text($"Build: {project.BuildNumber}").FontSize(14).FontColor(SubtleColor);
-            column.Item().PaddingTop(10).LineHorizontal(2).LineColor(PrimaryColor);
+            column.Item().PaddingTop(10).LineHorizontal(2).LineColor(HeadingColor);
         });
     }
 

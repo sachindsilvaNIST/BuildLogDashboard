@@ -6,6 +6,10 @@ namespace BuildLogDashboard.Models;
 
 public partial class BuildProject : ObservableObject
 {
+    // Static options for dropdowns
+    public static string[] AndroidVersionOptions => new[] { "TBD", "14", "13", "12", "11", "10", "9", "8.1", "8.0" };
+    public static string[] KernelVersionOptions => new[] { "TBD", "5.15", "5.10", "5.4", "4.19", "4.14", "4.9" };
+
     // Build Information
     [ObservableProperty]
     private string _buildNumber = string.Empty;
@@ -14,22 +18,35 @@ public partial class BuildProject : ObservableObject
     private DateTime _buildDate = DateTime.Now;
 
     [ObservableProperty]
-    private string _device = string.Empty;
+    private string _device = "TBD";
 
     [ObservableProperty]
     private string _buildType = "user";
 
     [ObservableProperty]
-    private string _androidVersion = string.Empty;
+    private string _androidVersion = "TBD";
 
     [ObservableProperty]
-    private string _securityPatch = string.Empty;
+    private DateTime? _securityPatchDate = new DateTime(2021, 10, 1);
+
+    // String property for backward compatibility with markdown parsing/generation
+    public string SecurityPatch
+    {
+        get => SecurityPatchDate?.ToString("yyyy-MM-dd") ?? "2021-10-01";
+        set
+        {
+            if (DateTime.TryParse(value, out var date))
+            {
+                SecurityPatchDate = date;
+            }
+        }
+    }
 
     [ObservableProperty]
-    private string _kernelVersion = string.Empty;
+    private string _kernelVersion = "TBD";
 
     [ObservableProperty]
-    private string _previousBuild = string.Empty;
+    private string _previousBuild = "TBD";
 
     // Files
     [ObservableProperty]
@@ -61,10 +78,10 @@ public partial class BuildProject : ObservableObject
 
     // Dependencies
     [ObservableProperty]
-    private string _bootloaderVersion = string.Empty;
+    private string _bootloaderVersion = "TBD";
 
     [ObservableProperty]
-    private string _compatibleOtaBuilds = string.Empty;
+    private string _compatibleOtaBuilds = "TBD";
 
     // Recommended For
     [ObservableProperty]

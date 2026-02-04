@@ -295,12 +295,16 @@ public partial class MainWindowViewModel : ViewModelBase
         if (file != null)
         {
             IsBusy = true;
-            BusyMessage = "Exporting Markdown...";
+            BusyMessage = "Exporting...";
             StatusMessage = "Exporting...";
 
             try
             {
                 await _projectManager.ExportAsMarkdownAsync(SelectedBuild, file.Path.LocalPath);
+
+                // Add 2-second delay for visual feedback
+                await Task.Delay(2000);
+
                 StatusMessage = $"Exported to {file.Name}";
             }
             catch (Exception ex)
@@ -336,14 +340,18 @@ public partial class MainWindowViewModel : ViewModelBase
         if (file != null)
         {
             IsBusy = true;
-            BusyMessage = "Exporting HTML...";
-            StatusMessage = "Exporting HTML...";
+            BusyMessage = "Exporting...";
+            StatusMessage = "Exporting...";
 
             try
             {
                 SelectedBuild.LastUpdated = DateTime.Now;
                 var html = _htmlGenerator.Generate(SelectedBuild);
                 await System.IO.File.WriteAllTextAsync(file.Path.LocalPath, html);
+
+                // Add 2-second delay for visual feedback
+                await Task.Delay(2000);
+
                 StatusMessage = $"Exported to {file.Name}";
             }
             catch (Exception ex)
@@ -379,13 +387,17 @@ public partial class MainWindowViewModel : ViewModelBase
         if (file != null)
         {
             IsBusy = true;
-            BusyMessage = "Exporting PDF...";
-            StatusMessage = "Exporting PDF...";
+            BusyMessage = "Exporting...";
+            StatusMessage = "Exporting...";
 
             try
             {
                 SelectedBuild.LastUpdated = DateTime.Now;
                 await Task.Run(() => _pdfGenerator.Generate(SelectedBuild, file.Path.LocalPath));
+
+                // Add 2-second delay for visual feedback
+                await Task.Delay(2000);
+
                 StatusMessage = $"Exported to {file.Name}";
             }
             catch (Exception ex)
@@ -482,6 +494,93 @@ public partial class MainWindowViewModel : ViewModelBase
         finally
         {
             IsBusy = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task DeleteMarkdownFileAsync()
+    {
+        if (StorageProvider == null) return;
+
+        var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = "Select Markdown File to Delete",
+            AllowMultiple = false,
+            FileTypeFilter = new[]
+            {
+                new FilePickerFileType("Markdown") { Patterns = new[] { "*.md" } }
+            }
+        });
+
+        if (files.Count > 0)
+        {
+            try
+            {
+                System.IO.File.Delete(files[0].Path.LocalPath);
+                StatusMessage = $"Deleted {files[0].Name}";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"Delete failed: {ex.Message}";
+            }
+        }
+    }
+
+    [RelayCommand]
+    private async Task DeleteHtmlFileAsync()
+    {
+        if (StorageProvider == null) return;
+
+        var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = "Select HTML File to Delete",
+            AllowMultiple = false,
+            FileTypeFilter = new[]
+            {
+                new FilePickerFileType("HTML") { Patterns = new[] { "*.html" } }
+            }
+        });
+
+        if (files.Count > 0)
+        {
+            try
+            {
+                System.IO.File.Delete(files[0].Path.LocalPath);
+                StatusMessage = $"Deleted {files[0].Name}";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"Delete failed: {ex.Message}";
+            }
+        }
+    }
+
+    [RelayCommand]
+    private async Task DeletePdfFileAsync()
+    {
+        if (StorageProvider == null) return;
+
+        var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = "Select PDF File to Delete",
+            AllowMultiple = false,
+            FileTypeFilter = new[]
+            {
+                new FilePickerFileType("PDF") { Patterns = new[] { "*.pdf" } }
+            }
+        });
+
+        if (files.Count > 0)
+        {
+            try
+            {
+                System.IO.File.Delete(files[0].Path.LocalPath);
+                StatusMessage = $"Deleted {files[0].Name}";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"Delete failed: {ex.Message}";
+            }
         }
     }
 

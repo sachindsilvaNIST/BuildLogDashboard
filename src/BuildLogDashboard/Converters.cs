@@ -64,7 +64,7 @@ public class SaveButtonBackgroundConverter : IValueConverter
     {
         if (value is bool isSaved && isSaved)
         {
-            return new SolidColorBrush(Color.Parse("#34C759")); // Apple green when saved
+            return new SolidColorBrush(Color.Parse("#107C10")); // Success green when saved (same as Export)
         }
         return new SolidColorBrush(Color.Parse("#007AFF")); // Apple blue when unsaved
     }
