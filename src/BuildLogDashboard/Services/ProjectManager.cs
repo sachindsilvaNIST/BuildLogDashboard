@@ -74,9 +74,8 @@ public class ProjectManager
 
         foreach (var identifier in buildIdentifiers)
         {
-            // Extract build number from identifier (format: buildnum.date.time)
-            var parts = identifier.Split('.');
-            if (parts.Length >= 1 && !existingBuildNumbers.Contains(parts[0]))
+            // Check if this full identifier already exists (format: buildnum.date.time)
+            if (!existingBuildNumbers.Contains(identifier))
             {
                 var project = _fileScanner.CreateProjectFromFiles(CurrentWorkspace, identifier);
                 if (!string.IsNullOrEmpty(project.BuildNumber))

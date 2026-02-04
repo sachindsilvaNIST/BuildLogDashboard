@@ -116,7 +116,8 @@ public class FileScanner
             if (parsed.HasValue)
             {
                 project.Device = parsed.Value.device;
-                project.BuildNumber = parsed.Value.buildNumber;
+                // Set build number to include date and time: buildnum.date.time
+                project.BuildNumber = $"{parsed.Value.buildNumber}.{parsed.Value.date}.{parsed.Value.time}";
 
                 // Parse date from format YYYYMMDD
                 if (DateTime.TryParseExact(parsed.Value.date, "yyyyMMdd",

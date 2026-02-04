@@ -57,3 +57,37 @@ public class BoolToGridLengthConverter : IValueConverter
         throw new NotImplementedException();
     }
 }
+
+public class SaveButtonBackgroundConverter : IValueConverter
+{
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        if (value is bool isSaved && isSaved)
+        {
+            return new SolidColorBrush(Color.Parse("#34C759")); // Apple green when saved
+        }
+        return new SolidColorBrush(Color.Parse("#007AFF")); // Apple blue when unsaved
+    }
+
+    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+public class InverseBoolConverter : IValueConverter
+{
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        if (value is bool boolValue)
+        {
+            return !boolValue;
+        }
+        return true;
+    }
+
+    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}

@@ -1,5 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Platform.Storage;
@@ -51,6 +53,9 @@ public partial class MainWindowViewModel : ViewModelBase
     [NotifyPropertyChangedFor(nameof(HasWorkspaceLoaded))]
     private bool _hasBuildsLoaded = false;
 
+    [ObservableProperty]
+    private bool _isSaved = false;
+
     // Computed property for button enable state
     public bool HasWorkspaceLoaded => HasBuildsLoaded || !string.IsNullOrEmpty(WorkspacePath);
 
@@ -64,11 +69,88 @@ public partial class MainWindowViewModel : ViewModelBase
         _pdfGenerator = new PdfGenerator();
     }
 
-    partial void OnSelectedBuildChanged(BuildProject? value)
+    partial void OnSelectedBuildChanged(BuildProject? oldValue, BuildProject? newValue)
     {
-        if (value != null && IsPreviewVisible)
+        // Unsubscribe from old build's changes
+        if (oldValue != null)
         {
-            UpdatePreview();
+            oldValue.PropertyChanged -= OnBuildPropertyChanged;
+            UnsubscribeFromCollections(oldValue);
+        }
+
+        // Subscribe to new build's changes
+        if (newValue != null)
+        {
+            newValue.PropertyChanged += OnBuildPropertyChanged;
+            SubscribeToCollections(newValue);
+
+            if (IsPreviewVisible)
+            {
+                UpdatePreview();
+            }
+        }
+
+        // Reset saved state when switching builds
+        IsSaved = false;
+    }
+
+    private void SubscribeToCollections(BuildProject build)
+    {
+        build.Files.CollectionChanged += OnCollectionChanged;
+        build.AppUpdates.CollectionChanged += OnCollectionChanged;
+        build.KnownIssues.CollectionChanged += OnCollectionChanged;
+        build.TestResults.CollectionChanged += OnCollectionChanged;
+
+        // Subscribe to each item's PropertyChanged
+        foreach (var item in build.Files) item.PropertyChanged += OnBuildPropertyChanged;
+        foreach (var item in build.AppUpdates) item.PropertyChanged += OnBuildPropertyChanged;
+        foreach (var item in build.KnownIssues) item.PropertyChanged += OnBuildPropertyChanged;
+        foreach (var item in build.TestResults) item.PropertyChanged += OnBuildPropertyChanged;
+    }
+
+    private void UnsubscribeFromCollections(BuildProject build)
+    {
+        build.Files.CollectionChanged -= OnCollectionChanged;
+        build.AppUpdates.CollectionChanged -= OnCollectionChanged;
+        build.KnownIssues.CollectionChanged -= OnCollectionChanged;
+        build.TestResults.CollectionChanged -= OnCollectionChanged;
+
+        foreach (var item in build.Files) item.PropertyChanged -= OnBuildPropertyChanged;
+        foreach (var item in build.AppUpdates) item.PropertyChanged -= OnBuildPropertyChanged;
+        foreach (var item in build.KnownIssues) item.PropertyChanged -= OnBuildPropertyChanged;
+        foreach (var item in build.TestResults) item.PropertyChanged -= OnBuildPropertyChanged;
+    }
+
+    private void OnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        // Subscribe to new items
+        if (e.NewItems != null)
+        {
+            foreach (INotifyPropertyChanged item in e.NewItems)
+            {
+                item.PropertyChanged += OnBuildPropertyChanged;
+            }
+        }
+
+        // Unsubscribe from removed items
+        if (e.OldItems != null)
+        {
+            foreach (INotifyPropertyChanged item in e.OldItems)
+            {
+                item.PropertyChanged -= OnBuildPropertyChanged;
+            }
+        }
+
+        // Mark as unsaved when collection changes
+        IsSaved = false;
+    }
+
+    private void OnBuildPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        // Don't mark as unsaved for LastUpdated changes (that's set during save)
+        if (e.PropertyName != nameof(BuildProject.LastUpdated))
+        {
+            IsSaved = false;
         }
     }
 
@@ -173,10 +255,16 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             SelectedBuild.LastUpdated = DateTime.Now;
             await _projectManager.SaveProjectAsync(SelectedBuild);
+
+            // Add 2-second delay for visual feedback
+            await Task.Delay(2000);
+
+            IsSaved = true;
             StatusMessage = "Saved successfully";
         }
         catch (Exception ex)
         {
+            IsSaved = false;
             StatusMessage = $"Save failed: {ex.Message}";
         }
         finally
