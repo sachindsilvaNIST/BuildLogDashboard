@@ -8,11 +8,6 @@
         <local:ViewLocator/>
     </Application.DataTemplates>
 
-    <Application.Styles>
-        <FluentTheme />
-        <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/>
-    </Application.Styles>
-
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -25,4 +20,72 @@
             <local:BoolToGridLengthConverter x:Key="BoolToGridLengthConverter"/>
         </ResourceDictionary>
     </Application.Resources>
+
+    <Application.Styles>
+        <FluentTheme />
+        <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/>
+
+        <!-- Button Base Styles with Transitions -->
+        <Style Selector="Button.btn-light-gray /template/ ContentPresenter">
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.15"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Button.btn-green /template/ ContentPresenter">
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.15"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Button.btn-blue /template/ ContentPresenter">
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.15"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Button.btn-red /template/ ContentPresenter">
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.15"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Button.btn-success /template/ ContentPresenter">
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.15"/>
+                </Transitions>
+            </Setter>
+        </Style>
+
+        <!-- Button Hover Styles (background only, foreground preserved) -->
+        <Style Selector="Button.btn-light-gray:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{StaticResource GlassAppleLightGrayHoverBrush}"/>
+            <Setter Property="Foreground" Value="#333333"/>
+        </Style>
+
+        <Style Selector="Button.btn-green:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{StaticResource GlassAppleGreenHoverBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+
+        <Style Selector="Button.btn-blue:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{StaticResource GlassAppleBlueHoverBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+
+        <Style Selector="Button.btn-red:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{StaticResource GlassAppleRedHoverBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+
+        <Style Selector="Button.btn-success:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{StaticResource GlassSuccessHoverBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+    </Application.Styles>
 </Application>

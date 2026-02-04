@@ -10,13 +10,16 @@
         x:DataType="vm:MainWindowViewModel"
         Title="Android OS Image Build Log Dashboard"
         Width="1400" Height="900"
-        MinWidth="1000" MinHeight="600"
+        MinWidth="1400" MinHeight="900"
+        MaxWidth="1400" MaxHeight="900"
+        CanResize="False"
         Background="{StaticResource GlassBackgroundBrush}">
 
     <Design.DataContext>
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
+    <Panel>
     <Grid RowDefinitions="Auto,*,Auto">
 
         <!-- Toolbar -->
@@ -31,6 +34,7 @@
                     <Button Command="{Binding OpenFolderCommand}"
                             ToolTip.Tip="Open Workspace Folder"
                             Padding="12,8"
+                            Classes="btn-light-gray"
                             Background="{StaticResource GlassAppleLightGrayBrush}"
                             Foreground="#333333">
                         <StackPanel Orientation="Horizontal" Spacing="6">
@@ -43,6 +47,7 @@
                     <Button Command="{Binding NewBuildCommand}"
                             ToolTip.Tip="Create New Build Log"
                             Padding="12,8"
+                            Classes="btn-green"
                             Background="{StaticResource GlassAppleGreenBrush}"
                             Foreground="White"
                             IsEnabled="{Binding HasWorkspaceLoaded}">
@@ -55,6 +60,7 @@
                     <Button Command="{Binding SaveBuildCommand}"
                             ToolTip.Tip="Save Current Build"
                             Padding="12,8"
+                            Classes="btn-blue"
                             Background="{StaticResource GlassAppleBlueBrush}"
                             Foreground="White"
                             IsEnabled="{Binding HasWorkspaceLoaded}">
@@ -70,6 +76,7 @@
                     <Button Command="{Binding ImportMarkdownCommand}"
                             ToolTip.Tip="Import Markdown File"
                             Padding="12,8"
+                            Classes="btn-red"
                             Background="{StaticResource GlassAppleRedBrush}"
                             Foreground="White">
                         <StackPanel Orientation="Horizontal" Spacing="6">
@@ -80,6 +87,7 @@
 
                     <Button ToolTip.Tip="Export Build Log"
                             Padding="12,8"
+                            Classes="btn-success"
                             Background="{StaticResource GlassSuccessBrush}"
                             Foreground="White"
                             IsEnabled="{Binding HasWorkspaceLoaded}">
@@ -127,7 +135,8 @@
                 </Border>
 
                 <!-- Right toolbar buttons -->
-                <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="8">
+                <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="8"
+                            IsVisible="{Binding HasWorkspaceLoaded}">
                     <Button Command="{Binding TogglePreviewCommand}"
                             ToolTip.Tip="Toggle Preview Panel"
                             Padding="12,8"
@@ -143,8 +152,52 @@
             </Grid>
         </Border>
 
-        <!-- Main Content -->
-        <Grid Grid.Row="1" ColumnDefinitions="280,*">
+        <!-- Welcome Panel (shown when no workspace loaded) -->
+        <Border Grid.Row="1"
+                IsVisible="{Binding !HasWorkspaceLoaded}"
+                Background="{StaticResource GlassBackgroundBrush}">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="24">
+                <PathIcon Data="M2 6C2 4.89543 2.89543 4 4 4H9L11 6H20C21.1046 6 22 6.89543 22 8V18C22 19.1046 21.1046 20 20 20H4C2.89543 20 2 19.1046 2 18V6Z"
+                          Width="80" Height="80" Foreground="{StaticResource GlassSubtleTextBrush}"/>
+                <TextBlock Text="Welcome to Build Log Dashboard"
+                           FontSize="28"
+                           FontWeight="SemiBold"
+                           Foreground="{StaticResource GlassTextBrush}"
+                           HorizontalAlignment="Center"/>
+                <TextBlock Text="Click 'Open Folder' to load an Android image workspace&#x0a;or 'Import' to load an existing markdown build log."
+                           FontSize="14"
+                           Foreground="{StaticResource GlassSubtleTextBrush}"
+                           HorizontalAlignment="Center"
+                           TextAlignment="Center"
+                           LineHeight="22"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="16" Margin="0,16,0,0">
+                    <Button Command="{Binding OpenFolderCommand}"
+                            Padding="20,12"
+                            Classes="btn-light-gray"
+                            Background="{StaticResource GlassAppleLightGrayBrush}"
+                            Foreground="#333333">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <PathIcon Data="M2 6C2 4.89543 2.89543 4 4 4H9L11 6H20C21.1046 6 22 6.89543 22 8V18C22 19.1046 21.1046 20 20 20H4C2.89543 20 2 19.1046 2 18V6Z"
+                                      Width="18" Height="18" Foreground="#333333"/>
+                            <TextBlock Text="Open Folder" VerticalAlignment="Center" FontSize="14"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Command="{Binding ImportMarkdownCommand}"
+                            Padding="20,12"
+                            Classes="btn-red"
+                            Background="{StaticResource GlassAppleRedBrush}"
+                            Foreground="White">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <PathIcon Data="M5 20H19V18H5V20ZM19 9H15V3H9V9H5L12 16L19 9Z" Width="18" Height="18" Foreground="White"/>
+                            <TextBlock Text="Import Markdown" VerticalAlignment="Center" FontSize="14"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- Main Content (shown when workspace loaded) -->
+        <Grid Grid.Row="1" ColumnDefinitions="280,*" IsVisible="{Binding HasWorkspaceLoaded}">
 
             <!-- Build List Sidebar -->
             <Border Grid.Column="0"
@@ -268,7 +321,7 @@
                                                 <TextBlock Grid.Column="0" Text="Files" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,12"/>
                                                 <Button Grid.Column="1" Command="{Binding ComputeChecksumsCommand}" Content="Compute SHA256" Margin="0,0,8,12" Padding="12,6"/>
                                                 <Button Grid.Column="2" Command="{Binding AddFileCommand}" Content="+ Add File" Margin="0,0,0,12" Padding="12,6"
-                                                        Background="{StaticResource GlassAppleBlueBrush}" Foreground="White"/>
+                                                        Classes="btn-blue" Background="{StaticResource GlassAppleBlueBrush}" Foreground="White"/>
                                             </Grid>
                                             <DataGrid ItemsSource="{Binding SelectedBuild.Files}"
                                                       AutoGenerateColumns="False"
@@ -646,8 +699,63 @@
                 <TextBlock Grid.Column="2"
                            Text="{Binding SelectedBuild.LastUpdated, StringFormat='Last updated: {0:yyyy-MM-dd HH:mm}'}"
                            Foreground="{StaticResource GlassSubtleTextBrush}"
-                           VerticalAlignment="Center"/>
+                           VerticalAlignment="Center"
+                           IsVisible="{Binding HasWorkspaceLoaded}"/>
             </Grid>
         </Border>
     </Grid>
+
+    <!-- Loading Overlay (Apple-style) -->
+    <Border IsVisible="{Binding IsBusy}"
+            Background="#80000000"
+            ZIndex="1000">
+        <Border HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Background="White"
+                CornerRadius="16"
+                Padding="40,32"
+                BoxShadow="0 8 32 0 #40000000">
+            <StackPanel Spacing="20" HorizontalAlignment="Center">
+                <!-- Circular Spinner using Arc Path -->
+                <Canvas Width="48" Height="48" HorizontalAlignment="Center">
+                    <Path Canvas.Left="0" Canvas.Top="0"
+                          Stroke="{StaticResource GlassBorderBrush}"
+                          StrokeThickness="4"
+                          Data="M 24,4 A 20,20 0 1 1 23.99,4"/>
+                    <Path Canvas.Left="0" Canvas.Top="0"
+                          Name="SpinnerArc"
+                          Stroke="{StaticResource GlassAppleBlueBrush}"
+                          StrokeThickness="4"
+                          StrokeLineCap="Round"
+                          Data="M 24,4 A 20,20 0 0 1 44,24"
+                          RenderTransformOrigin="24,24">
+                        <Path.Styles>
+                            <Style Selector="Path#SpinnerArc">
+                                <Style.Animations>
+                                    <Animation Duration="0:0:1" IterationCount="Infinite">
+                                        <KeyFrame Cue="0%">
+                                            <Setter Property="RotateTransform.Angle" Value="0"/>
+                                        </KeyFrame>
+                                        <KeyFrame Cue="100%">
+                                            <Setter Property="RotateTransform.Angle" Value="360"/>
+                                        </KeyFrame>
+                                    </Animation>
+                                </Style.Animations>
+                            </Style>
+                        </Path.Styles>
+                        <Path.RenderTransform>
+                            <RotateTransform Angle="0"/>
+                        </Path.RenderTransform>
+                    </Path>
+                </Canvas>
+                <!-- Loading Message -->
+                <TextBlock Text="{Binding BusyMessage}"
+                           FontSize="15"
+                           FontWeight="Medium"
+                           Foreground="{StaticResource GlassTextBrush}"
+                           HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Border>
+    </Border>
+    </Panel>
 </Window>

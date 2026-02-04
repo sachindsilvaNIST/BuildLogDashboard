@@ -17,6 +17,13 @@
     <Color x:Key="GlassAppleRedColor">#FF3B30</Color>
     <Color x:Key="GlassAppleLightGrayColor">#E5E5EA</Color>
 
+    <!-- Hover Colors (lighter versions for hover states) -->
+    <Color x:Key="GlassAppleBlueHoverColor">#4DA3FF</Color>
+    <Color x:Key="GlassAppleGreenHoverColor">#7ADB8F</Color>
+    <Color x:Key="GlassAppleRedHoverColor">#FF7A73</Color>
+    <Color x:Key="GlassAppleLightGrayHoverColor">#F2F2F5</Color>
+    <Color x:Key="GlassSuccessHoverColor">#4CAF4C</Color>
+
     <!-- Brushes -->
     <SolidColorBrush x:Key="GlassPrimaryBrush" Color="{StaticResource GlassPrimaryColor}" />
     <SolidColorBrush x:Key="GlassSecondaryBrush" Color="{StaticResource GlassSecondaryColor}" />
@@ -30,6 +37,13 @@
     <SolidColorBrush x:Key="GlassAppleGreenBrush" Color="{StaticResource GlassAppleGreenColor}" />
     <SolidColorBrush x:Key="GlassAppleRedBrush" Color="{StaticResource GlassAppleRedColor}" />
     <SolidColorBrush x:Key="GlassAppleLightGrayBrush" Color="{StaticResource GlassAppleLightGrayColor}" />
+
+    <!-- Hover Brushes -->
+    <SolidColorBrush x:Key="GlassAppleBlueHoverBrush" Color="{StaticResource GlassAppleBlueHoverColor}" />
+    <SolidColorBrush x:Key="GlassAppleGreenHoverBrush" Color="{StaticResource GlassAppleGreenHoverColor}" />
+    <SolidColorBrush x:Key="GlassAppleRedHoverBrush" Color="{StaticResource GlassAppleRedHoverColor}" />
+    <SolidColorBrush x:Key="GlassAppleLightGrayHoverBrush" Color="{StaticResource GlassAppleLightGrayHoverColor}" />
+    <SolidColorBrush x:Key="GlassSuccessHoverBrush" Color="{StaticResource GlassSuccessHoverColor}" />
 
     <!-- Semi-transparent panel for glass effect -->
     <SolidColorBrush x:Key="GlassPanelTranslucentBrush" Color="#F5FFFFFF" />

@@ -45,6 +45,9 @@ public partial class MainWindowViewModel : ViewModelBase
     private string _statusMessage = "Ready";
 
     [ObservableProperty]
+    private string _busyMessage = "Loading...";
+
+    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasWorkspaceLoaded))]
     private bool _hasBuildsLoaded = false;
 
@@ -99,6 +102,7 @@ public partial class MainWindowViewModel : ViewModelBase
         if (string.IsNullOrEmpty(WorkspacePath)) return;
 
         IsBusy = true;
+        BusyMessage = "Loading builds...";
         StatusMessage = "Loading builds...";
 
         try
@@ -117,15 +121,25 @@ public partial class MainWindowViewModel : ViewModelBase
                     if (Builds.Count > 0)
                     {
                         SelectedBuild = Builds[0];
+                        HasBuildsLoaded = true;
+                        StatusMessage = $"Loaded {Builds.Count} build(s)";
                     }
-
-                    HasBuildsLoaded = Builds.Count > 0;
-                    StatusMessage = $"Loaded {Builds.Count} build(s)";
+                    else
+                    {
+                        // No valid builds found - reset to welcome state
+                        HasBuildsLoaded = false;
+                        WorkspacePath = string.Empty;
+                        SelectedBuild = null;
+                        StatusMessage = "No valid build files found (.zip/.json). Please select a valid workspace.";
+                    }
                 });
             });
         }
         catch (Exception ex)
         {
+            // Reset state on error
+            HasBuildsLoaded = false;
+            WorkspacePath = string.Empty;
             StatusMessage = $"Error: {ex.Message}";
         }
         finally
@@ -152,6 +166,7 @@ public partial class MainWindowViewModel : ViewModelBase
         if (SelectedBuild == null) return;
 
         IsBusy = true;
+        BusyMessage = "Saving...";
         StatusMessage = "Saving...";
 
         try
@@ -192,6 +207,7 @@ public partial class MainWindowViewModel : ViewModelBase
         if (file != null)
         {
             IsBusy = true;
+            BusyMessage = "Exporting Markdown...";
             StatusMessage = "Exporting...";
 
             try
@@ -232,6 +248,7 @@ public partial class MainWindowViewModel : ViewModelBase
         if (file != null)
         {
             IsBusy = true;
+            BusyMessage = "Exporting HTML...";
             StatusMessage = "Exporting HTML...";
 
             try
@@ -274,6 +291,7 @@ public partial class MainWindowViewModel : ViewModelBase
         if (file != null)
         {
             IsBusy = true;
+            BusyMessage = "Exporting PDF...";
             StatusMessage = "Exporting PDF...";
 
             try
@@ -311,6 +329,7 @@ public partial class MainWindowViewModel : ViewModelBase
         if (files.Count > 0)
         {
             IsBusy = true;
+            BusyMessage = "Importing...";
             StatusMessage = "Importing...";
 
             try
@@ -318,6 +337,7 @@ public partial class MainWindowViewModel : ViewModelBase
                 var project = await _projectManager.ImportMarkdownAsync(files[0].Path.LocalPath);
                 Builds.Insert(0, project);
                 SelectedBuild = project;
+                HasBuildsLoaded = true;
                 StatusMessage = "Imported successfully";
             }
             catch (Exception ex)
@@ -359,6 +379,7 @@ public partial class MainWindowViewModel : ViewModelBase
         if (SelectedBuild == null) return;
 
         IsBusy = true;
+        BusyMessage = "Computing checksums...";
         StatusMessage = "Computing checksums...";
 
         try
