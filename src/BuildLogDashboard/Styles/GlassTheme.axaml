@@ -1,0 +1,106 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Color Palette -->
+    <Color x:Key="GlassPrimaryColor">#0078D4</Color>
+    <Color x:Key="GlassSecondaryColor">#106EBE</Color>
+    <Color x:Key="GlassBackgroundColor">#F3F3F3</Color>
+    <Color x:Key="GlassPanelColor">#FFFFFF</Color>
+    <Color x:Key="GlassBorderColor">#E0E0E0</Color>
+    <Color x:Key="GlassTextColor">#1A1A1A</Color>
+    <Color x:Key="GlassSubtleTextColor">#666666</Color>
+    <Color x:Key="GlassSuccessColor">#107C10</Color>
+    <Color x:Key="GlassWarningColor">#FF8C00</Color>
+    <Color x:Key="GlassErrorColor">#D13438</Color>
+
+    <!-- Brushes -->
+    <SolidColorBrush x:Key="GlassPrimaryBrush" Color="{StaticResource GlassPrimaryColor}" />
+    <SolidColorBrush x:Key="GlassSecondaryBrush" Color="{StaticResource GlassSecondaryColor}" />
+    <SolidColorBrush x:Key="GlassBackgroundBrush" Color="{StaticResource GlassBackgroundColor}" />
+    <SolidColorBrush x:Key="GlassPanelBrush" Color="{StaticResource GlassPanelColor}" />
+    <SolidColorBrush x:Key="GlassBorderBrush" Color="{StaticResource GlassBorderColor}" />
+    <SolidColorBrush x:Key="GlassTextBrush" Color="{StaticResource GlassTextColor}" />
+    <SolidColorBrush x:Key="GlassSubtleTextBrush" Color="{StaticResource GlassSubtleTextColor}" />
+
+    <!-- Semi-transparent panel for glass effect -->
+    <SolidColorBrush x:Key="GlassPanelTranslucentBrush" Color="#F5FFFFFF" />
+
+    <!-- Panel Style -->
+    <ControlTheme x:Key="GlassPanel" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource GlassPanelTranslucentBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource GlassBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Padding" Value="16" />
+    </ControlTheme>
+
+    <!-- Card Style -->
+    <ControlTheme x:Key="GlassCard" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource GlassPanelBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource GlassBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="Padding" Value="12" />
+    </ControlTheme>
+
+    <!-- Primary Button Style -->
+    <ControlTheme x:Key="GlassPrimaryButton" TargetType="Button">
+        <Setter Property="Background" Value="{StaticResource GlassPrimaryBrush}" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="Padding" Value="16,8" />
+        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </ControlTheme>
+
+    <!-- Secondary Button Style -->
+    <ControlTheme x:Key="GlassSecondaryButton" TargetType="Button">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{StaticResource GlassPrimaryBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource GlassPrimaryBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="16,8" />
+        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </ControlTheme>
+
+    <!-- Toolbar Button Style -->
+    <ControlTheme x:Key="GlassToolbarButton" TargetType="Button">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{StaticResource GlassTextBrush}" />
+        <Setter Property="Padding" Value="12,8" />
+        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="FontSize" Value="13" />
+    </ControlTheme>
+
+    <!-- TextBox Style -->
+    <ControlTheme x:Key="GlassTextBox" TargetType="TextBox">
+        <Setter Property="Background" Value="{StaticResource GlassPanelBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource GlassBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="Padding" Value="10,8" />
+    </ControlTheme>
+
+    <!-- Header Text Style -->
+    <ControlTheme x:Key="GlassHeaderText" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="20" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{StaticResource GlassTextBrush}" />
+    </ControlTheme>
+
+    <!-- Subheader Text Style -->
+    <ControlTheme x:Key="GlassSubheaderText" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{StaticResource GlassTextBrush}" />
+    </ControlTheme>
+
+    <!-- Label Text Style -->
+    <ControlTheme x:Key="GlassLabelText" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="Foreground" Value="{StaticResource GlassSubtleTextBrush}" />
+        <Setter Property="Margin" Value="0,0,0,4" />
+    </ControlTheme>
+
+</ResourceDictionary>

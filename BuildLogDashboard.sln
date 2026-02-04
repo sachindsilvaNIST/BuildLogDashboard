@@ -1,0 +1,27 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{0EB6FCE7-456D-44D1-90C5-3AC9C190F1B8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuildLogDashboard", "src\BuildLogDashboard\BuildLogDashboard.csproj", "{24406FF4-C71D-4890-8F5D-FFDC4A8A60B7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{24406FF4-C71D-4890-8F5D-FFDC4A8A60B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{24406FF4-C71D-4890-8F5D-FFDC4A8A60B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{24406FF4-C71D-4890-8F5D-FFDC4A8A60B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{24406FF4-C71D-4890-8F5D-FFDC4A8A60B7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{24406FF4-C71D-4890-8F5D-FFDC4A8A60B7} = {0EB6FCE7-456D-44D1-90C5-3AC9C190F1B8}
+	EndGlobalSection
+EndGlobal
