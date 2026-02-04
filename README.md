@@ -277,3 +277,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 **Built for AOSP Build Engineers** - Simplifying Android OS Image documentation management.
+
+DevC: **[Sachin.R.Dsilva](https://github.com/sachindsilvaNIST)**
