@@ -59,6 +59,18 @@ public class ProjectManager
                 var project = _markdownParser.ParseFile(readmeFile);
                 if (!string.IsNullOrEmpty(project.BuildNumber))
                 {
+                    // Resolve FullPath for files parsed from markdown
+                    foreach (var file in project.Files)
+                    {
+                        if (string.IsNullOrEmpty(file.FullPath) && !string.IsNullOrEmpty(file.FileName))
+                        {
+                            var candidatePath = Path.Combine(CurrentWorkspace, file.FileName);
+                            if (File.Exists(candidatePath))
+                            {
+                                file.FullPath = candidatePath;
+                            }
+                        }
+                    }
                     projects.Add(project);
                 }
             }

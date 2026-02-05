@@ -330,37 +330,9 @@
                             </Grid>
                         </Button>
 
-                        <!-- Testing -->
-                        <Button Command="{Binding NavigateToSectionCommand}"
-                                CommandParameter="3"
-                                Classes="nav-item"
-                                Background="{Binding IsTestingActive, Converter={StaticResource ActiveNavBackgroundConverter}}"
-                                Padding="12,10"
-                                HorizontalContentAlignment="Stretch"
-                                HorizontalAlignment="Stretch"
-                                CornerRadius="6">
-                            <Grid ColumnDefinitions="24,*,Auto">
-                                <PathIcon Grid.Column="0"
-                                          Data="M12 2C6.48 2 2 6.48 2 12S6.48 22 12 22 22 17.52 22 12 17.52 2 12 2ZM10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z"
-                                          Width="16" Height="16"
-                                          Foreground="{Binding IsTestingActive, Converter={StaticResource ActiveNavForegroundConverter}}"/>
-                                <TextBlock Grid.Column="1"
-                                           Text="Testing"
-                                           FontSize="14"
-                                           VerticalAlignment="Center"
-                                           Margin="8,0,0,0"
-                                           Foreground="{Binding IsTestingActive, Converter={StaticResource ActiveNavForegroundConverter}}"/>
-                                <Ellipse Grid.Column="2"
-                                         Width="8" Height="8"
-                                         Fill="{StaticResource GlassAppleRedBrush}"
-                                         IsVisible="{Binding HasTestingIssues}"
-                                         VerticalAlignment="Center"/>
-                            </Grid>
-                        </Button>
-
                         <!-- Release -->
                         <Button Command="{Binding NavigateToSectionCommand}"
-                                CommandParameter="4"
+                                CommandParameter="3"
                                 Classes="nav-item"
                                 Background="{Binding IsReleaseActive, Converter={StaticResource ActiveNavBackgroundConverter}}"
                                 Padding="12,10"
@@ -422,7 +394,7 @@
                                             <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding SelectedBuild.BuildNumber}" Margin="0,0,0,12"/>
 
                                             <TextBlock Grid.Row="0" Grid.Column="3" Text="Build Date" VerticalAlignment="Center" Foreground="{StaticResource GlassSubtleTextBrush}"/>
-                                            <CalendarDatePicker Grid.Row="0" Grid.Column="4" SelectedDate="{Binding SelectedBuild.BuildDate}" Margin="0,0,0,12"/>
+                                            <DatePicker Grid.Row="0" Grid.Column="4" SelectedDate="{Binding SelectedBuild.BuildDate, Converter={StaticResource DateTimeToDateTimeOffsetConverter}}" Margin="0,0,0,12" HorizontalAlignment="Stretch"/>
 
                                             <TextBlock Grid.Row="1" Grid.Column="0" Text="Device" VerticalAlignment="Center" Foreground="{StaticResource GlassSubtleTextBrush}"/>
                                             <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding SelectedBuild.Device}" Margin="0,0,0,12"/>
@@ -441,10 +413,10 @@
                                                       Margin="0,0,0,12"/>
 
                                             <TextBlock Grid.Row="2" Grid.Column="3" Text="Security Patch" VerticalAlignment="Center" Foreground="{StaticResource GlassSubtleTextBrush}"/>
-                                            <CalendarDatePicker Grid.Row="2" Grid.Column="4"
-                                                                SelectedDate="{Binding SelectedBuild.SecurityPatchDate}"
-                                                                Margin="0,0,0,12"
-                                                                HorizontalAlignment="Stretch"/>
+                                            <DatePicker Grid.Row="2" Grid.Column="4"
+                                                        SelectedDate="{Binding SelectedBuild.SecurityPatchDate, Converter={StaticResource DateTimeToDateTimeOffsetConverter}}"
+                                                        Margin="0,0,0,12"
+                                                        HorizontalAlignment="Stretch"/>
 
                                             <TextBlock Grid.Row="3" Grid.Column="0" Text="Kernel Version" VerticalAlignment="Center" Foreground="{StaticResource GlassSubtleTextBrush}"/>
                                             <ComboBox Grid.Row="3" Grid.Column="1"
@@ -527,7 +499,8 @@
                                         <StackPanel>
                                             <Grid ColumnDefinitions="*,Auto">
                                                 <TextBlock Grid.Column="0" Text="App Updates" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,12"/>
-                                                <Button Grid.Column="1" Command="{Binding AddAppUpdateCommand}" Content="+ Add App" Margin="0,0,0,12" Padding="12,6"/>
+                                                <Button Grid.Column="1" Command="{Binding AddAppUpdateCommand}" Content="+ Add App" Margin="0,0,0,12" Padding="12,6"
+                                                        Classes="btn-blue" Background="{StaticResource GlassAppleBlueBrush}" Foreground="White"/>
                                             </Grid>
                                             <DataGrid ItemsSource="{Binding SelectedBuild.AppUpdates}"
                                                       AutoGenerateColumns="False"
@@ -543,15 +516,19 @@
                                                     <DataGridTextColumn Header="Path" Binding="{Binding Path}" Width="*"/>
                                                     <DataGridTextColumn Header="Version" Binding="{Binding Version}" Width="80"/>
                                                     <DataGridTextColumn Header="Changes" Binding="{Binding Changes}" Width="*"/>
+                                                    <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*"/>
                                                     <DataGridTemplateColumn Header="" Width="40">
                                                         <DataGridTemplateColumn.CellTemplate>
                                                             <DataTemplate>
                                                                 <Button Command="{Binding $parent[DataGrid].((vm:MainWindowViewModel)DataContext).RemoveAppUpdateCommand}"
                                                                         CommandParameter="{Binding}"
-                                                                        Content="X"
                                                                         Padding="4"
                                                                         Background="Transparent"
-                                                                        Foreground="{StaticResource GlassErrorColor}"/>
+                                                                        ToolTip.Tip="Delete">
+                                                                    <PathIcon Data="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"
+                                                                              Width="14" Height="14"
+                                                                              Foreground="{StaticResource GlassErrorColor}"/>
+                                                                </Button>
                                                             </DataTemplate>
                                                         </DataGridTemplateColumn.CellTemplate>
                                                     </DataGridTemplateColumn>
@@ -567,12 +544,24 @@
                                             CornerRadius="8"
                                             Padding="20">
                                         <StackPanel>
-                                            <TextBlock Text="System Modifications" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,8"/>
-                                            <TextBlock Text="Enter each modification on a new line" FontSize="12" Foreground="{StaticResource GlassSubtleTextBrush}" Margin="0,0,0,8"/>
-                                            <TextBox Text="{Binding SelectedBuild.SystemModifications}"
-                                                     AcceptsReturn="True"
-                                                     TextWrapping="Wrap"
-                                                     Height="100"/>
+                                            <Grid ColumnDefinitions="*,Auto">
+                                                <TextBlock Grid.Column="0" Text="System Modifications" FontSize="16" FontWeight="SemiBold"/>
+                                                <Button Grid.Column="1" Command="{Binding ToggleSystemModificationsCommand}"
+                                                        Padding="8,4" Classes="btn-blue" Background="{StaticResource GlassAppleBlueBrush}" Foreground="White"
+                                                        IsVisible="{Binding !IsSystemModificationsExpanded}">
+                                                    <PathIcon Data="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z" Width="14" Height="14" Foreground="White"/>
+                                                </Button>
+                                                <Button Grid.Column="1" Command="{Binding ToggleSystemModificationsCommand}"
+                                                        Padding="8,4" Classes="btn-red" Background="{StaticResource GlassAppleRedBrush}" Foreground="White"
+                                                        IsVisible="{Binding IsSystemModificationsExpanded}">
+                                                    <PathIcon Data="M19 13H5V11H19V13Z" Width="14" Height="14" Foreground="White"/>
+                                                </Button>
+                                            </Grid>
+                                            <StackPanel IsVisible="{Binding IsSystemModificationsExpanded}" Margin="0,8,0,0">
+                                                <TextBlock Text="Enter each modification on a new line" FontSize="12" Foreground="{StaticResource GlassSubtleTextBrush}" Margin="0,0,0,8"/>
+                                                <TextBox Text="{Binding SelectedBuild.SystemModifications}"
+                                                         AcceptsReturn="True" TextWrapping="Wrap" Height="100"/>
+                                            </StackPanel>
                                         </StackPanel>
                                     </Border>
 
@@ -583,11 +572,24 @@
                                             CornerRadius="8"
                                             Padding="20">
                                         <StackPanel>
-                                            <TextBlock Text="Kernel/Driver Changes" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,8"/>
-                                            <TextBox Text="{Binding SelectedBuild.KernelDriverChanges}"
-                                                     AcceptsReturn="True"
-                                                     TextWrapping="Wrap"
-                                                     Height="100"/>
+                                            <Grid ColumnDefinitions="*,Auto">
+                                                <TextBlock Grid.Column="0" Text="Kernel/Driver Changes" FontSize="16" FontWeight="SemiBold"/>
+                                                <Button Grid.Column="1" Command="{Binding ToggleKernelChangesCommand}"
+                                                        Padding="8,4" Classes="btn-blue" Background="{StaticResource GlassAppleBlueBrush}" Foreground="White"
+                                                        IsVisible="{Binding !IsKernelChangesExpanded}">
+                                                    <PathIcon Data="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z" Width="14" Height="14" Foreground="White"/>
+                                                </Button>
+                                                <Button Grid.Column="1" Command="{Binding ToggleKernelChangesCommand}"
+                                                        Padding="8,4" Classes="btn-red" Background="{StaticResource GlassAppleRedBrush}" Foreground="White"
+                                                        IsVisible="{Binding IsKernelChangesExpanded}">
+                                                    <PathIcon Data="M19 13H5V11H19V13Z" Width="14" Height="14" Foreground="White"/>
+                                                </Button>
+                                            </Grid>
+                                            <StackPanel IsVisible="{Binding IsKernelChangesExpanded}" Margin="0,8,0,0">
+                                                <TextBlock Text="Enter each change on a new line" FontSize="12" Foreground="{StaticResource GlassSubtleTextBrush}" Margin="0,0,0,8"/>
+                                                <TextBox Text="{Binding SelectedBuild.KernelDriverChanges}"
+                                                         AcceptsReturn="True" TextWrapping="Wrap" Height="100"/>
+                                            </StackPanel>
                                         </StackPanel>
                                     </Border>
 
@@ -598,11 +600,24 @@
                                             CornerRadius="8"
                                             Padding="20">
                                         <StackPanel>
-                                            <TextBlock Text="Configuration Changes" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,8"/>
-                                            <TextBox Text="{Binding SelectedBuild.ConfigurationChanges}"
-                                                     AcceptsReturn="True"
-                                                     TextWrapping="Wrap"
-                                                     Height="100"/>
+                                            <Grid ColumnDefinitions="*,Auto">
+                                                <TextBlock Grid.Column="0" Text="Configuration Changes" FontSize="16" FontWeight="SemiBold"/>
+                                                <Button Grid.Column="1" Command="{Binding ToggleConfigChangesCommand}"
+                                                        Padding="8,4" Classes="btn-blue" Background="{StaticResource GlassAppleBlueBrush}" Foreground="White"
+                                                        IsVisible="{Binding !IsConfigChangesExpanded}">
+                                                    <PathIcon Data="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z" Width="14" Height="14" Foreground="White"/>
+                                                </Button>
+                                                <Button Grid.Column="1" Command="{Binding ToggleConfigChangesCommand}"
+                                                        Padding="8,4" Classes="btn-red" Background="{StaticResource GlassAppleRedBrush}" Foreground="White"
+                                                        IsVisible="{Binding IsConfigChangesExpanded}">
+                                                    <PathIcon Data="M19 13H5V11H19V13Z" Width="14" Height="14" Foreground="White"/>
+                                                </Button>
+                                            </Grid>
+                                            <StackPanel IsVisible="{Binding IsConfigChangesExpanded}" Margin="0,8,0,0">
+                                                <TextBlock Text="Enter each change on a new line" FontSize="12" Foreground="{StaticResource GlassSubtleTextBrush}" Margin="0,0,0,8"/>
+                                                <TextBox Text="{Binding SelectedBuild.ConfigurationChanges}"
+                                                         AcceptsReturn="True" TextWrapping="Wrap" Height="100"/>
+                                            </StackPanel>
                                         </StackPanel>
                                     </Border>
 
@@ -613,11 +628,24 @@
                                             CornerRadius="8"
                                             Padding="20">
                                         <StackPanel>
-                                            <TextBlock Text="Removed Components" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,8"/>
-                                            <TextBox Text="{Binding SelectedBuild.RemovedComponents}"
-                                                     AcceptsReturn="True"
-                                                     TextWrapping="Wrap"
-                                                     Height="100"/>
+                                            <Grid ColumnDefinitions="*,Auto">
+                                                <TextBlock Grid.Column="0" Text="Removed Components" FontSize="16" FontWeight="SemiBold"/>
+                                                <Button Grid.Column="1" Command="{Binding ToggleRemovedComponentsCommand}"
+                                                        Padding="8,4" Classes="btn-blue" Background="{StaticResource GlassAppleBlueBrush}" Foreground="White"
+                                                        IsVisible="{Binding !IsRemovedComponentsExpanded}">
+                                                    <PathIcon Data="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z" Width="14" Height="14" Foreground="White"/>
+                                                </Button>
+                                                <Button Grid.Column="1" Command="{Binding ToggleRemovedComponentsCommand}"
+                                                        Padding="8,4" Classes="btn-red" Background="{StaticResource GlassAppleRedBrush}" Foreground="White"
+                                                        IsVisible="{Binding IsRemovedComponentsExpanded}">
+                                                    <PathIcon Data="M19 13H5V11H19V13Z" Width="14" Height="14" Foreground="White"/>
+                                                </Button>
+                                            </Grid>
+                                            <StackPanel IsVisible="{Binding IsRemovedComponentsExpanded}" Margin="0,8,0,0">
+                                                <TextBlock Text="Enter each component on a new line" FontSize="12" Foreground="{StaticResource GlassSubtleTextBrush}" Margin="0,0,0,8"/>
+                                                <TextBox Text="{Binding SelectedBuild.RemovedComponents}"
+                                                         AcceptsReturn="True" TextWrapping="Wrap" Height="100"/>
+                                            </StackPanel>
                                         </StackPanel>
                                     </Border>
                                 </StackPanel>
@@ -636,7 +664,8 @@
                                     <StackPanel>
                                         <Grid ColumnDefinitions="*,Auto">
                                             <TextBlock Grid.Column="0" Text="Known Issues" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,12"/>
-                                            <Button Grid.Column="1" Command="{Binding AddKnownIssueCommand}" Content="+ Add Issue" Margin="0,0,0,12" Padding="12,6"/>
+                                            <Button Grid.Column="1" Command="{Binding AddKnownIssueCommand}" Content="+ Add Issue" Margin="0,0,0,12" Padding="12,6"
+                                                    Classes="btn-blue" Background="{StaticResource GlassAppleBlueBrush}" Foreground="White"/>
                                         </Grid>
                                         <DataGrid ItemsSource="{Binding SelectedBuild.KnownIssues}"
                                                   AutoGenerateColumns="False"
@@ -668,84 +697,18 @@
                                                         <DataTemplate>
                                                             <Button Command="{Binding $parent[DataGrid].((vm:MainWindowViewModel)DataContext).RemoveKnownIssueCommand}"
                                                                     CommandParameter="{Binding}"
-                                                                    Content="X"
                                                                     Padding="4"
                                                                     Background="Transparent"
-                                                                    Foreground="{StaticResource GlassErrorColor}"/>
+                                                                    ToolTip.Tip="Delete">
+                                                                <PathIcon Data="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"
+                                                                          Width="14" Height="14"
+                                                                          Foreground="{StaticResource GlassErrorColor}"/>
+                                                            </Button>
                                                         </DataTemplate>
                                                     </DataGridTemplateColumn.CellTemplate>
                                                 </DataGridTemplateColumn>
                                             </DataGrid.Columns>
                                         </DataGrid>
-                                    </StackPanel>
-                                </Border>
-                            </ScrollViewer>
-                        </TabItem>
-
-                        <!-- Testing Tab -->
-                        <TabItem Header="Testing">
-                            <ScrollViewer>
-                                <Border Background="{StaticResource GlassPanelBrush}"
-                                        BorderBrush="{StaticResource GlassBorderBrush}"
-                                        BorderThickness="1"
-                                        CornerRadius="8"
-                                        Padding="20"
-                                        Margin="0,16,0,0">
-                                    <StackPanel>
-                                        <Grid ColumnDefinitions="*,Auto">
-                                            <TextBlock Grid.Column="0" Text="Testing Status" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,12"/>
-                                            <Button Grid.Column="1" Command="{Binding AddTestResultCommand}" Content="+ Add Test" Margin="0,0,0,12" Padding="12,6"/>
-                                        </Grid>
-                                        <DataGrid ItemsSource="{Binding SelectedBuild.TestResults}"
-                                                  AutoGenerateColumns="False"
-                                                  CanUserReorderColumns="False"
-                                                  CanUserResizeColumns="True"
-                                                  GridLinesVisibility="Horizontal"
-                                                  BorderThickness="1"
-                                                  BorderBrush="{StaticResource GlassBorderBrush}"
-                                                  CornerRadius="4">
-                                            <DataGrid.Columns>
-                                                <DataGridTextColumn Header="Test Name" Binding="{Binding TestName}" Width="*"/>
-                                                <DataGridTemplateColumn Header="Result" Width="120">
-                                                    <DataGridTemplateColumn.CellTemplate>
-                                                        <DataTemplate>
-                                                            <ComboBox SelectedItem="{Binding Result}" ItemsSource="{x:Static m:TestResult.ResultOptions}"/>
-                                                        </DataTemplate>
-                                                    </DataGridTemplateColumn.CellTemplate>
-                                                </DataGridTemplateColumn>
-                                                <DataGridTextColumn Header="Notes" Binding="{Binding Notes}" Width="*"/>
-                                                <DataGridTemplateColumn Header="" Width="40">
-                                                    <DataGridTemplateColumn.CellTemplate>
-                                                        <DataTemplate>
-                                                            <Button Command="{Binding $parent[DataGrid].((vm:MainWindowViewModel)DataContext).RemoveTestResultCommand}"
-                                                                    CommandParameter="{Binding}"
-                                                                    Content="X"
-                                                                    Padding="4"
-                                                                    Background="Transparent"
-                                                                    Foreground="{StaticResource GlassErrorColor}"/>
-                                                        </DataTemplate>
-                                                    </DataGridTemplateColumn.CellTemplate>
-                                                </DataGridTemplateColumn>
-                                            </DataGrid.Columns>
-                                        </DataGrid>
-                                        <!-- Validation Warnings for Testing -->
-                                        <StackPanel Margin="0,12,0,0">
-                                            <TextBlock Text="* Required: Boot Test result is still Pending"
-                                                       Foreground="{StaticResource GlassErrorColor}"
-                                                       FontSize="11"
-                                                       IsVisible="{Binding SelectedBuild.IsBootTestInvalid}"
-                                                       Margin="0,2"/>
-                                            <TextBlock Text="* Required: Basic Functionality result is still Pending"
-                                                       Foreground="{StaticResource GlassErrorColor}"
-                                                       FontSize="11"
-                                                       IsVisible="{Binding SelectedBuild.IsBasicFunctionalityInvalid}"
-                                                       Margin="0,2"/>
-                                            <TextBlock Text="* Required: OTA Update Test result is still Pending"
-                                                       Foreground="{StaticResource GlassErrorColor}"
-                                                       FontSize="11"
-                                                       IsVisible="{Binding SelectedBuild.IsOtaTestInvalid}"
-                                                       Margin="0,2"/>
-                                        </StackPanel>
                                     </StackPanel>
                                 </Border>
                             </ScrollViewer>
@@ -804,10 +767,22 @@
                                                        FontSize="11"
                                                        IsVisible="{Binding SelectedBuild.IsRecommendedForInvalid}"
                                                        Margin="0,0,0,12"/>
-                                            <Grid ColumnDefinitions="150,*">
-                                                <TextBlock Grid.Column="0" Text="Specific Customer" VerticalAlignment="Center" Foreground="{StaticResource GlassSubtleTextBrush}"/>
-                                                <TextBox Grid.Column="1" Text="{Binding SelectedBuild.SpecificCustomer}"/>
-                                            </Grid>
+                                            <StackPanel Margin="0,4,0,0">
+                                                <ToggleButton IsChecked="{Binding IsSpecificCustomerEnabled}"
+                                                              Padding="12,6"
+                                                              Background="{Binding IsSpecificCustomerEnabled, Converter={StaticResource BoolToBrushConverter}}"
+                                                              Foreground="{Binding IsSpecificCustomerEnabled, Converter={StaticResource BoolToForegroundConverter}}">
+                                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                                        <PathIcon Data="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+                                                                  Width="14" Height="14"/>
+                                                        <TextBlock Text="Specific Customer" VerticalAlignment="Center"/>
+                                                    </StackPanel>
+                                                </ToggleButton>
+                                                <TextBox Text="{Binding SelectedBuild.SpecificCustomer}"
+                                                         IsVisible="{Binding IsSpecificCustomerEnabled}"
+                                                         Watermark="Enter customer name..."
+                                                         Margin="0,8,0,0"/>
+                                            </StackPanel>
                                         </StackPanel>
                                     </Border>
 
@@ -836,13 +811,23 @@
                                             <TextBlock Text="Build Engineer" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,12"/>
                                             <Grid RowDefinitions="Auto,Auto,Auto,Auto" ColumnDefinitions="150,*">
                                                 <TextBlock Grid.Row="0" Grid.Column="0" Text="Built by" VerticalAlignment="Center" Foreground="{StaticResource GlassSubtleTextBrush}"/>
-                                                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding SelectedBuild.BuiltBy}" Margin="0,0,0,12"/>
+                                                <AutoCompleteBox Grid.Row="0" Grid.Column="1"
+                                                                   Text="{Binding SelectedBuild.BuiltBy}"
+                                                                   ItemsSource="{Binding BuiltByHistory}"
+                                                                   FilterMode="Contains"
+                                                                   Watermark="Type engineer name..."
+                                                                   Margin="0,0,0,12"/>
 
                                                 <TextBlock Grid.Row="1" Grid.Column="0" Text="Reviewed by" VerticalAlignment="Center" Foreground="{StaticResource GlassSubtleTextBrush}"/>
-                                                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding SelectedBuild.ReviewedBy}" Margin="0,0,0,12"/>
+                                                <AutoCompleteBox Grid.Row="1" Grid.Column="1"
+                                                                   Text="{Binding SelectedBuild.ReviewedBy}"
+                                                                   ItemsSource="{Binding ReviewedByHistory}"
+                                                                   FilterMode="Contains"
+                                                                   Watermark="Type reviewer name..."
+                                                                   Margin="0,0,0,12"/>
 
                                                 <TextBlock Grid.Row="2" Grid.Column="0" Text="Approved Date" VerticalAlignment="Center" Foreground="{StaticResource GlassSubtleTextBrush}"/>
-                                                <CalendarDatePicker Grid.Row="2" Grid.Column="1" SelectedDate="{Binding SelectedBuild.ApprovedForReleaseDate}" Margin="0,0,0,12"/>
+                                                <DatePicker Grid.Row="2" Grid.Column="1" SelectedDate="{Binding SelectedBuild.ApprovedForReleaseDate, Converter={StaticResource DateTimeToDateTimeOffsetConverter}}" Margin="0,0,0,12" HorizontalAlignment="Stretch"/>
 
                                                 <!-- Validation Warnings -->
                                                 <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2">

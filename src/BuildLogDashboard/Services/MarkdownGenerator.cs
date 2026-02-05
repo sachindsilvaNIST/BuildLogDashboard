@@ -50,11 +50,11 @@ public class MarkdownGenerator
         {
             sb.AppendLine("### App Updates");
             sb.AppendLine();
-            sb.AppendLine("| App | Path | Version | Changes |");
-            sb.AppendLine("|-----|------|---------|---------|");
+            sb.AppendLine("| App | Path | Version | Changes | Description |");
+            sb.AppendLine("|-----|------|---------|---------|-------------|");
             foreach (var app in project.AppUpdates)
             {
-                sb.AppendLine($"| {app.AppName} | `{app.Path}` | {app.Version} | {app.Changes} |");
+                sb.AppendLine($"| {app.AppName} | `{app.Path}` | {app.Version} | {app.Changes} | {app.Description} |");
             }
             sb.AppendLine();
 

@@ -202,13 +202,18 @@ public class MarkdownParser
         var cells = SplitTableRow(line);
         if (cells.Count < 4 || cells[0].ToLower().Contains("app")) return; // Skip header
 
-        project.AppUpdates.Add(new AppUpdate
+        var appUpdate = new AppUpdate
         {
             AppName = CleanCellContent(cells[0]),
             Path = CleanCellContent(cells[1]),
             Version = CleanCellContent(cells[2]),
             Changes = CleanCellContent(cells[3])
-        });
+        };
+
+        if (cells.Count >= 5)
+            appUpdate.Description = CleanCellContent(cells[4]);
+
+        project.AppUpdates.Add(appUpdate);
     }
 
     private void ParseKnownIssueRow(string line, BuildProject project)

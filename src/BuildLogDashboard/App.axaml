@@ -22,6 +22,7 @@
             <local:InverseBoolConverter x:Key="InverseBoolConverter"/>
             <local:ActiveNavForegroundConverter x:Key="ActiveNavForegroundConverter"/>
             <local:ActiveNavBackgroundConverter x:Key="ActiveNavBackgroundConverter"/>
+            <local:DateTimeToDateTimeOffsetConverter x:Key="DateTimeToDateTimeOffsetConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 

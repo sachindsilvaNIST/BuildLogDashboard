@@ -100,6 +100,15 @@ public partial class MainWindowViewModel : ViewModelBase
             {
                 UpdatePreview();
             }
+
+            // Auto-expand collapsible sections if they have content
+            IsSystemModificationsExpanded = !string.IsNullOrWhiteSpace(newValue.SystemModifications);
+            IsKernelChangesExpanded = !string.IsNullOrWhiteSpace(newValue.KernelDriverChanges);
+            IsConfigChangesExpanded = !string.IsNullOrWhiteSpace(newValue.ConfigurationChanges);
+            IsRemovedComponentsExpanded = !string.IsNullOrWhiteSpace(newValue.RemovedComponents);
+
+            // Auto-enable Specific Customer toggle if content exists
+            IsSpecificCustomerEnabled = !string.IsNullOrWhiteSpace(newValue.SpecificCustomer);
         }
 
         // Reset saved state when switching builds
@@ -111,7 +120,6 @@ public partial class MainWindowViewModel : ViewModelBase
 
         // Refresh section validation indicators
         OnPropertyChanged(nameof(HasBuildInfoIssues));
-        OnPropertyChanged(nameof(HasTestingIssues));
         OnPropertyChanged(nameof(HasReleaseIssues));
     }
 
@@ -120,13 +128,11 @@ public partial class MainWindowViewModel : ViewModelBase
         build.Files.CollectionChanged += OnCollectionChanged;
         build.AppUpdates.CollectionChanged += OnCollectionChanged;
         build.KnownIssues.CollectionChanged += OnCollectionChanged;
-        build.TestResults.CollectionChanged += OnCollectionChanged;
 
         // Subscribe to each item's PropertyChanged
         foreach (var item in build.Files) item.PropertyChanged += OnBuildPropertyChanged;
         foreach (var item in build.AppUpdates) item.PropertyChanged += OnBuildPropertyChanged;
         foreach (var item in build.KnownIssues) item.PropertyChanged += OnBuildPropertyChanged;
-        foreach (var item in build.TestResults) item.PropertyChanged += OnBuildPropertyChanged;
     }
 
     private void UnsubscribeFromCollections(BuildProject build)
@@ -134,12 +140,10 @@ public partial class MainWindowViewModel : ViewModelBase
         build.Files.CollectionChanged -= OnCollectionChanged;
         build.AppUpdates.CollectionChanged -= OnCollectionChanged;
         build.KnownIssues.CollectionChanged -= OnCollectionChanged;
-        build.TestResults.CollectionChanged -= OnCollectionChanged;
 
         foreach (var item in build.Files) item.PropertyChanged -= OnBuildPropertyChanged;
         foreach (var item in build.AppUpdates) item.PropertyChanged -= OnBuildPropertyChanged;
         foreach (var item in build.KnownIssues) item.PropertyChanged -= OnBuildPropertyChanged;
-        foreach (var item in build.TestResults) item.PropertyChanged -= OnBuildPropertyChanged;
     }
 
     private void OnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -162,28 +166,12 @@ public partial class MainWindowViewModel : ViewModelBase
             }
         }
 
-        // Refresh test validation if TestResults collection changed
-        if (sender == SelectedBuild?.TestResults)
-        {
-            SelectedBuild?.RefreshTestValidation();
-            OnPropertyChanged(nameof(CanSave));
-            OnPropertyChanged(nameof(CanExport));
-        }
-
         // Mark as unsaved when collection changes
         IsSaved = false;
     }
 
     private void OnBuildPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        // Refresh test validation when test result changes
-        if (sender is TestResult && e.PropertyName == nameof(TestResult.Result))
-        {
-            SelectedBuild?.RefreshTestValidation();
-            OnPropertyChanged(nameof(CanSave));
-            OnPropertyChanged(nameof(CanExport));
-        }
-
         // Update button states and section validation when validation-related properties change
         if (e.PropertyName == nameof(BuildProject.HasValidationErrors) ||
             e.PropertyName?.StartsWith("Is") == true)  // IsXxxInvalid properties
@@ -191,7 +179,6 @@ public partial class MainWindowViewModel : ViewModelBase
             OnPropertyChanged(nameof(CanSave));
             OnPropertyChanged(nameof(CanExport));
             OnPropertyChanged(nameof(HasBuildInfoIssues));
-            OnPropertyChanged(nameof(HasTestingIssues));
             OnPropertyChanged(nameof(HasReleaseIssues));
         }
 
@@ -251,6 +238,7 @@ public partial class MainWindowViewModel : ViewModelBase
                         SelectedBuild = Builds[0];
                         HasBuildsLoaded = true;
                         StatusMessage = $"Loaded {Builds.Count} build(s)";
+                        RefreshEngineerHistory();
                     }
                     else
                     {
@@ -292,14 +280,6 @@ public partial class MainWindowViewModel : ViewModelBase
             missingFields.Add("Build Type");
         if (build.IsAndroidVersionInvalid)
             missingFields.Add("Android Version");
-
-        // Testing Status
-        if (build.IsBootTestInvalid)
-            missingFields.Add("Boot Test (still Pending)");
-        if (build.IsBasicFunctionalityInvalid)
-            missingFields.Add("Basic Functionality (still Pending)");
-        if (build.IsOtaTestInvalid)
-            missingFields.Add("OTA Update Test (still Pending)");
 
         // Recommended For
         if (build.IsRecommendedForInvalid)
@@ -626,6 +606,7 @@ public partial class MainWindowViewModel : ViewModelBase
                 SelectedBuild = project;
                 HasBuildsLoaded = true;
                 StatusMessage = "Imported successfully";
+                RefreshEngineerHistory();
             }
             catch (Exception ex)
             {
@@ -824,27 +805,6 @@ public partial class MainWindowViewModel : ViewModelBase
         }
     }
 
-    // Test Results
-    [RelayCommand]
-    private void AddTestResult()
-    {
-        SelectedBuild?.TestResults.Add(new TestResult
-        {
-            TestName = "New Test",
-            Result = "Pending",
-            Notes = ""
-        });
-    }
-
-    [RelayCommand]
-    private void RemoveTestResult(TestResult? testResult)
-    {
-        if (testResult != null && SelectedBuild != null)
-        {
-            SelectedBuild.TestResults.Remove(testResult);
-        }
-    }
-
     // Files
     [RelayCommand]
     private void AddFile()
@@ -879,7 +839,6 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(IsBuildInfoActive));
         OnPropertyChanged(nameof(IsChangelogActive));
         OnPropertyChanged(nameof(IsIssuesActive));
-        OnPropertyChanged(nameof(IsTestingActive));
         OnPropertyChanged(nameof(IsReleaseActive));
     }
 
@@ -887,19 +846,101 @@ public partial class MainWindowViewModel : ViewModelBase
     public bool IsBuildInfoActive => SelectedTabIndex == 0;
     public bool IsChangelogActive => SelectedTabIndex == 1;
     public bool IsIssuesActive => SelectedTabIndex == 2;
-    public bool IsTestingActive => SelectedTabIndex == 3;
-    public bool IsReleaseActive => SelectedTabIndex == 4;
+    public bool IsReleaseActive => SelectedTabIndex == 3;
 
     // Section validation indicators for sidebar navigation
     public bool HasBuildInfoIssues => SelectedBuild != null &&
         (SelectedBuild.IsBuildNumberInvalid || SelectedBuild.IsDeviceInvalid ||
          SelectedBuild.IsAndroidVersionInvalid || SelectedBuild.IsBuildTypeInvalid);
 
-    public bool HasTestingIssues => SelectedBuild != null &&
-        (SelectedBuild.IsBootTestInvalid || SelectedBuild.IsBasicFunctionalityInvalid ||
-         SelectedBuild.IsOtaTestInvalid);
-
     public bool HasReleaseIssues => SelectedBuild != null &&
         (SelectedBuild.IsRecommendedForInvalid || SelectedBuild.IsBuiltByInvalid ||
          SelectedBuild.IsReviewedByInvalid || SelectedBuild.IsApprovedDateInvalid);
+
+    // Collapsible changelog sections
+    [ObservableProperty]
+    private bool _isSystemModificationsExpanded = false;
+
+    [ObservableProperty]
+    private bool _isKernelChangesExpanded = false;
+
+    [ObservableProperty]
+    private bool _isConfigChangesExpanded = false;
+
+    [ObservableProperty]
+    private bool _isRemovedComponentsExpanded = false;
+
+    [RelayCommand]
+    private void ToggleSystemModifications()
+    {
+        IsSystemModificationsExpanded = !IsSystemModificationsExpanded;
+        if (!IsSystemModificationsExpanded && SelectedBuild != null)
+            SelectedBuild.SystemModifications = string.Empty;
+    }
+
+    [RelayCommand]
+    private void ToggleKernelChanges()
+    {
+        IsKernelChangesExpanded = !IsKernelChangesExpanded;
+        if (!IsKernelChangesExpanded && SelectedBuild != null)
+            SelectedBuild.KernelDriverChanges = string.Empty;
+    }
+
+    [RelayCommand]
+    private void ToggleConfigChanges()
+    {
+        IsConfigChangesExpanded = !IsConfigChangesExpanded;
+        if (!IsConfigChangesExpanded && SelectedBuild != null)
+            SelectedBuild.ConfigurationChanges = string.Empty;
+    }
+
+    [RelayCommand]
+    private void ToggleRemovedComponents()
+    {
+        IsRemovedComponentsExpanded = !IsRemovedComponentsExpanded;
+        if (!IsRemovedComponentsExpanded && SelectedBuild != null)
+            SelectedBuild.RemovedComponents = string.Empty;
+    }
+
+    // Specific Customer toggle
+    [ObservableProperty]
+    private bool _isSpecificCustomerEnabled = false;
+
+    partial void OnIsSpecificCustomerEnabledChanged(bool value)
+    {
+        if (!value && SelectedBuild != null)
+            SelectedBuild.SpecificCustomer = string.Empty;
+    }
+
+    // Build Engineer input history
+    [ObservableProperty]
+    private ObservableCollection<string> _builtByHistory = new();
+
+    [ObservableProperty]
+    private ObservableCollection<string> _reviewedByHistory = new();
+
+    private void RefreshEngineerHistory()
+    {
+        var builtByNames = Builds
+            .Where(b => !string.IsNullOrWhiteSpace(b.BuiltBy))
+            .Select(b => b.BuiltBy.Trim())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(n => n)
+            .ToList();
+
+        var reviewedByNames = Builds
+            .Where(b => !string.IsNullOrWhiteSpace(b.ReviewedBy))
+            .Select(b => b.ReviewedBy.Trim())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(n => n)
+            .ToList();
+
+        BuiltByHistory.Clear();
+        foreach (var name in builtByNames)
+            BuiltByHistory.Add(name);
+
+        ReviewedByHistory.Clear();
+        foreach (var name in reviewedByNames)
+            ReviewedByHistory.Add(name);
+    }
 }

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.ObjectModel;
-using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace BuildLogDashboard.Models;
@@ -134,11 +133,6 @@ public partial class BuildProject : ObservableObject
     public bool IsAndroidVersionInvalid => string.IsNullOrWhiteSpace(AndroidVersion) || AndroidVersion == "TBD";
     public bool IsBuildTypeInvalid => string.IsNullOrWhiteSpace(BuildType) || BuildType == "TBD";
 
-    // Testing validation - check if required tests are still Pending
-    public bool IsBootTestInvalid => TestResults.FirstOrDefault(t => t.TestName == "Boot Test")?.Result == "Pending";
-    public bool IsBasicFunctionalityInvalid => TestResults.FirstOrDefault(t => t.TestName == "Basic Functionality")?.Result == "Pending";
-    public bool IsOtaTestInvalid => TestResults.FirstOrDefault(t => t.TestName == "OTA Update Test")?.Result == "Pending";
-
     // Recommended For validation - at least one must be checked
     public bool IsRecommendedForInvalid => !InternalTesting && !CustomerRelease;
 
@@ -149,8 +143,7 @@ public partial class BuildProject : ObservableObject
 
     // Overall validation check (Build Type validated separately via popup)
     public bool HasValidationErrors => IsBuildNumberInvalid || IsDeviceInvalid || IsAndroidVersionInvalid ||
-                                       IsBootTestInvalid || IsBasicFunctionalityInvalid ||
-                                       IsOtaTestInvalid || IsRecommendedForInvalid || IsBuiltByInvalid ||
+                                       IsRecommendedForInvalid || IsBuiltByInvalid ||
                                        IsReviewedByInvalid || IsApprovedDateInvalid;
 
     // Refresh validation when properties change
@@ -177,19 +170,7 @@ public partial class BuildProject : ObservableObject
         OnPropertyChanged(nameof(HasValidationErrors));
     }
 
-    public void RefreshTestValidation()
-    {
-        OnPropertyChanged(nameof(IsBootTestInvalid));
-        OnPropertyChanged(nameof(IsBasicFunctionalityInvalid));
-        OnPropertyChanged(nameof(IsOtaTestInvalid));
-        OnPropertyChanged(nameof(HasValidationErrors));
-    }
-
     public BuildProject()
     {
-        // Initialize with default test items
-        TestResults.Add(new TestResult("Boot Test", "Pending", ""));
-        TestResults.Add(new TestResult("Basic Functionality", "Pending", ""));
-        TestResults.Add(new TestResult("OTA Update Test", "Pending", ""));
     }
 }
