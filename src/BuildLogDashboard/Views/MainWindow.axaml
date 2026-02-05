@@ -319,13 +319,13 @@
                                             <TextBlock Grid.Row="1" Grid.Column="3" Text="Build Type" VerticalAlignment="Center" Foreground="{StaticResource GlassSubtleTextBrush}"/>
                                             <ComboBox Grid.Row="1" Grid.Column="4"
                                                       ItemsSource="{x:Static m:BuildProject.BuildTypeOptions}"
-                                                      SelectedItem="{Binding SelectedBuild.BuildType}"
+                                                      SelectedValue="{Binding SelectedBuild.BuildType}"
                                                       Margin="0,0,0,12"/>
 
                                             <TextBlock Grid.Row="2" Grid.Column="0" Text="Android Version" VerticalAlignment="Center" Foreground="{StaticResource GlassSubtleTextBrush}"/>
                                             <ComboBox Grid.Row="2" Grid.Column="1"
                                                       ItemsSource="{x:Static m:BuildProject.AndroidVersionOptions}"
-                                                      SelectedItem="{Binding SelectedBuild.AndroidVersion}"
+                                                      SelectedValue="{Binding SelectedBuild.AndroidVersion}"
                                                       IsEditable="True"
                                                       Margin="0,0,0,12"/>
 
@@ -338,7 +338,7 @@
                                             <TextBlock Grid.Row="3" Grid.Column="0" Text="Kernel Version" VerticalAlignment="Center" Foreground="{StaticResource GlassSubtleTextBrush}"/>
                                             <ComboBox Grid.Row="3" Grid.Column="1"
                                                       ItemsSource="{x:Static m:BuildProject.KernelVersionOptions}"
-                                                      SelectedItem="{Binding SelectedBuild.KernelVersion}"
+                                                      SelectedValue="{Binding SelectedBuild.KernelVersion}"
                                                       IsEditable="True"
                                                       Margin="0,0,0,12"/>
 
