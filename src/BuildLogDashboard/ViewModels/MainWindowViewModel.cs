@@ -65,11 +65,11 @@ public partial class MainWindowViewModel : ViewModelBase
     // Computed property for button enable state
     public bool HasWorkspaceLoaded => HasBuildsLoaded || !string.IsNullOrEmpty(WorkspacePath);
 
-    // Save button enabled only if no validation errors
-    public bool CanSave => HasWorkspaceLoaded && SelectedBuild != null && !SelectedBuild.HasValidationErrors;
+    // Save button enabled when build is selected (validation handled via popup)
+    public bool CanSave => HasWorkspaceLoaded && SelectedBuild != null;
 
-    // Export button enabled only if no validation errors
-    public bool CanExport => HasWorkspaceLoaded && SelectedBuild != null && !SelectedBuild.HasValidationErrors;
+    // Export button enabled when build is selected (validation handled via popup)
+    public bool CanExport => HasWorkspaceLoaded && SelectedBuild != null;
 
     // For file dialog
     public IStorageProvider? StorageProvider { get; set; }
@@ -288,18 +288,73 @@ public partial class MainWindowViewModel : ViewModelBase
         StatusMessage = "Created new build";
     }
 
+    /// <summary>
+    /// Validates all mandatory fields and returns a list of missing field names
+    /// </summary>
+    private System.Collections.Generic.List<string> GetMissingMandatoryFields(BuildProject build)
+    {
+        var missingFields = new System.Collections.Generic.List<string>();
+
+        // Build Information
+        if (build.IsBuildNumberInvalid)
+            missingFields.Add("Build Number");
+        if (build.IsDeviceInvalid)
+            missingFields.Add("Device");
+        if (build.IsBuildTypeInvalid)
+            missingFields.Add("Build Type");
+        if (build.IsAndroidVersionInvalid)
+            missingFields.Add("Android Version");
+
+        // Testing Status
+        if (build.IsBootTestInvalid)
+            missingFields.Add("Boot Test (still Pending)");
+        if (build.IsBasicFunctionalityInvalid)
+            missingFields.Add("Basic Functionality (still Pending)");
+        if (build.IsOtaTestInvalid)
+            missingFields.Add("OTA Update Test (still Pending)");
+
+        // Recommended For
+        if (build.IsRecommendedForInvalid)
+            missingFields.Add("Recommended For (select at least one)");
+
+        // Build Engineer
+        if (build.IsBuiltByInvalid)
+            missingFields.Add("Built by");
+        if (build.IsReviewedByInvalid)
+            missingFields.Add("Reviewed by");
+        if (build.IsApprovedDateInvalid)
+            missingFields.Add("Approved Date");
+
+        return missingFields;
+    }
+
+    /// <summary>
+    /// Shows validation popup if there are missing mandatory fields
+    /// </summary>
+    /// <returns>True if validation passed, false if there are errors</returns>
+    private async Task<bool> ValidateAndShowPopupAsync(BuildProject build, string action)
+    {
+        var missingFields = GetMissingMandatoryFields(build);
+
+        if (missingFields.Count > 0 && MainWindow != null)
+        {
+            var fieldList = string.Join("\n• ", missingFields);
+            await Views.AlertDialog.ShowAsync(MainWindow, "Required Fields Missing",
+                $"Please complete the following mandatory fields before {action}:\n\n• {fieldList}");
+            return false;
+        }
+
+        return true;
+    }
+
     [RelayCommand]
     private async Task SaveBuildAsync()
     {
         if (SelectedBuild == null) return;
 
-        // Check for Build Type validation
-        if (SelectedBuild.IsBuildTypeInvalid && MainWindow != null)
-        {
-            await Views.AlertDialog.ShowAsync(MainWindow, "Build Type Required",
-                "Please select a valid Build Type before saving.\n\nBuild Type cannot be left as '-- Select --'.");
+        // Validate all mandatory fields
+        if (!await ValidateAndShowPopupAsync(SelectedBuild, "saving"))
             return;
-        }
 
         IsBusy = true;
         BusyMessage = "Saving...";
@@ -332,13 +387,9 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         if (SelectedBuild == null || MainWindow == null) return;
 
-        // Check for Build Type validation
-        if (SelectedBuild.IsBuildTypeInvalid)
-        {
-            await Views.AlertDialog.ShowAsync(MainWindow, "Build Type Required",
-                "Please select a valid Build Type before exporting.\n\nBuild Type cannot be left as '-- Select --'.");
+        // Validate all mandatory fields
+        if (!await ValidateAndShowPopupAsync(SelectedBuild, "exporting"))
             return;
-        }
 
         var suggestedName = string.IsNullOrEmpty(SelectedBuild.BuildNumber)
             ? "BUILD_LOG.md"
@@ -395,13 +446,9 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         if (SelectedBuild == null || MainWindow == null) return;
 
-        // Check for Build Type validation
-        if (SelectedBuild.IsBuildTypeInvalid)
-        {
-            await Views.AlertDialog.ShowAsync(MainWindow, "Build Type Required",
-                "Please select a valid Build Type before exporting.\n\nBuild Type cannot be left as '-- Select --'.");
+        // Validate all mandatory fields
+        if (!await ValidateAndShowPopupAsync(SelectedBuild, "exporting"))
             return;
-        }
 
         var suggestedName = string.IsNullOrEmpty(SelectedBuild.BuildNumber)
             ? "BUILD_LOG.html"
@@ -460,13 +507,9 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         if (SelectedBuild == null || MainWindow == null) return;
 
-        // Check for Build Type validation
-        if (SelectedBuild.IsBuildTypeInvalid)
-        {
-            await Views.AlertDialog.ShowAsync(MainWindow, "Build Type Required",
-                "Please select a valid Build Type before exporting.\n\nBuild Type cannot be left as '-- Select --'.");
+        // Validate all mandatory fields
+        if (!await ValidateAndShowPopupAsync(SelectedBuild, "exporting"))
             return;
-        }
 
         var suggestedName = string.IsNullOrEmpty(SelectedBuild.BuildNumber)
             ? "BUILD_LOG.pdf"
