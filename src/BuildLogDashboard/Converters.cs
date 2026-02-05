@@ -75,6 +75,32 @@ public class SaveButtonBackgroundConverter : IValueConverter
     }
 }
 
+public class ActiveNavForegroundConverter : IValueConverter
+{
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        if (value is bool isActive && isActive)
+            return new SolidColorBrush(Color.Parse("#007AFF")); // Apple Blue when active
+        return new SolidColorBrush(Color.Parse("#666666")); // Subtle text when inactive
+    }
+
+    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => throw new NotImplementedException();
+}
+
+public class ActiveNavBackgroundConverter : IValueConverter
+{
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        if (value is bool isActive && isActive)
+            return new SolidColorBrush(Color.Parse("#F0F7FF")); // Light blue tint when active
+        return Brushes.Transparent;
+    }
+
+    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => throw new NotImplementedException();
+}
+
 public class InverseBoolConverter : IValueConverter
 {
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)

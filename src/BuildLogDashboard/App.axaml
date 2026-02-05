@@ -20,6 +20,8 @@
             <local:BoolToGridLengthConverter x:Key="BoolToGridLengthConverter"/>
             <local:SaveButtonBackgroundConverter x:Key="SaveButtonBackgroundConverter"/>
             <local:InverseBoolConverter x:Key="InverseBoolConverter"/>
+            <local:ActiveNavForegroundConverter x:Key="ActiveNavForegroundConverter"/>
+            <local:ActiveNavBackgroundConverter x:Key="ActiveNavBackgroundConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 
@@ -100,6 +102,18 @@
         <Style Selector="Button.btn-success:pointerover /template/ ContentPresenter">
             <Setter Property="Background" Value="{StaticResource GlassSuccessHoverBrush}"/>
             <Setter Property="Foreground" Value="White"/>
+        </Style>
+
+        <!-- Navigation button styles -->
+        <Style Selector="Button.nav-item /template/ ContentPresenter">
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.15"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Button.nav-item:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#10007AFF"/>
         </Style>
     </Application.Styles>
 </Application>

@@ -35,9 +35,6 @@ public partial class MainWindowViewModel : ViewModelBase
     private BuildProject? _selectedBuild;
 
     [ObservableProperty]
-    private string _searchText = string.Empty;
-
-    [ObservableProperty]
     private bool _isPreviewVisible = false;
 
     [ObservableProperty]
@@ -111,6 +108,11 @@ public partial class MainWindowViewModel : ViewModelBase
         // Update button enable states
         OnPropertyChanged(nameof(CanSave));
         OnPropertyChanged(nameof(CanExport));
+
+        // Refresh section validation indicators
+        OnPropertyChanged(nameof(HasBuildInfoIssues));
+        OnPropertyChanged(nameof(HasTestingIssues));
+        OnPropertyChanged(nameof(HasReleaseIssues));
     }
 
     private void SubscribeToCollections(BuildProject build)
@@ -182,12 +184,15 @@ public partial class MainWindowViewModel : ViewModelBase
             OnPropertyChanged(nameof(CanExport));
         }
 
-        // Update button states when validation-related properties change
+        // Update button states and section validation when validation-related properties change
         if (e.PropertyName == nameof(BuildProject.HasValidationErrors) ||
             e.PropertyName?.StartsWith("Is") == true)  // IsXxxInvalid properties
         {
             OnPropertyChanged(nameof(CanSave));
             OnPropertyChanged(nameof(CanExport));
+            OnPropertyChanged(nameof(HasBuildInfoIssues));
+            OnPropertyChanged(nameof(HasTestingIssues));
+            OnPropertyChanged(nameof(HasReleaseIssues));
         }
 
         // Don't mark as unsaved for LastUpdated changes (that's set during save)
@@ -195,11 +200,6 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             IsSaved = false;
         }
-    }
-
-    partial void OnSearchTextChanged(string value)
-    {
-        FilterBuilds();
     }
 
     [RelayCommand]
@@ -274,18 +274,6 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             IsBusy = false;
         }
-    }
-
-    [RelayCommand]
-    private void NewBuild()
-    {
-        var newProject = _projectManager.CreateNewProject();
-        newProject.BuildDate = DateTime.Now;
-        newProject.BuildNumber = $"NEW-{DateTime.Now:yyyyMMdd-HHmmss}";
-
-        Builds.Insert(0, newProject);
-        SelectedBuild = newProject;
-        StatusMessage = "Created new build";
     }
 
     /// <summary>
@@ -792,26 +780,6 @@ public partial class MainWindowViewModel : ViewModelBase
         }
     }
 
-    [RelayCommand]
-    private void DeleteBuild()
-    {
-        if (SelectedBuild == null) return;
-
-        var index = Builds.IndexOf(SelectedBuild);
-        Builds.Remove(SelectedBuild);
-
-        if (Builds.Count > 0)
-        {
-            SelectedBuild = Builds[Math.Min(index, Builds.Count - 1)];
-        }
-        else
-        {
-            SelectedBuild = null;
-        }
-
-        StatusMessage = "Build removed from list";
-    }
-
     // App Updates
     [RelayCommand]
     private void AddAppUpdate()
@@ -898,18 +866,40 @@ public partial class MainWindowViewModel : ViewModelBase
         }
     }
 
-    private void FilterBuilds()
+    // Section navigation
+    [RelayCommand]
+    private void NavigateToSection(string tabIndex)
     {
-        if (string.IsNullOrWhiteSpace(SearchText))
-        {
-            return;
-        }
-
-        var searchLower = SearchText.ToLower();
-        var filtered = Builds.Where(b =>
-            b.BuildNumber.ToLower().Contains(searchLower) ||
-            b.Device.ToLower().Contains(searchLower) ||
-            b.BuildDate.ToString("yyyy-MM-dd").Contains(searchLower)
-        ).ToList();
+        if (int.TryParse(tabIndex, out var index))
+            SelectedTabIndex = index;
     }
+
+    partial void OnSelectedTabIndexChanged(int value)
+    {
+        OnPropertyChanged(nameof(IsBuildInfoActive));
+        OnPropertyChanged(nameof(IsChangelogActive));
+        OnPropertyChanged(nameof(IsIssuesActive));
+        OnPropertyChanged(nameof(IsTestingActive));
+        OnPropertyChanged(nameof(IsReleaseActive));
+    }
+
+    // Active tab indicators for sidebar navigation
+    public bool IsBuildInfoActive => SelectedTabIndex == 0;
+    public bool IsChangelogActive => SelectedTabIndex == 1;
+    public bool IsIssuesActive => SelectedTabIndex == 2;
+    public bool IsTestingActive => SelectedTabIndex == 3;
+    public bool IsReleaseActive => SelectedTabIndex == 4;
+
+    // Section validation indicators for sidebar navigation
+    public bool HasBuildInfoIssues => SelectedBuild != null &&
+        (SelectedBuild.IsBuildNumberInvalid || SelectedBuild.IsDeviceInvalid ||
+         SelectedBuild.IsAndroidVersionInvalid || SelectedBuild.IsBuildTypeInvalid);
+
+    public bool HasTestingIssues => SelectedBuild != null &&
+        (SelectedBuild.IsBootTestInvalid || SelectedBuild.IsBasicFunctionalityInvalid ||
+         SelectedBuild.IsOtaTestInvalid);
+
+    public bool HasReleaseIssues => SelectedBuild != null &&
+        (SelectedBuild.IsRecommendedForInvalid || SelectedBuild.IsBuiltByInvalid ||
+         SelectedBuild.IsReviewedByInvalid || SelectedBuild.IsApprovedDateInvalid);
 }

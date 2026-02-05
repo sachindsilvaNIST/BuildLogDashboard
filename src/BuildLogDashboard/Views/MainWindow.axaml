@@ -44,19 +44,6 @@
                         </StackPanel>
                     </Button>
 
-                    <Button Command="{Binding NewBuildCommand}"
-                            ToolTip.Tip="Create New Build Log"
-                            Padding="12,8"
-                            Classes="btn-success"
-                            Background="{StaticResource GlassSuccessBrush}"
-                            Foreground="White"
-                            IsEnabled="{Binding HasWorkspaceLoaded}">
-                        <StackPanel Orientation="Horizontal" Spacing="6">
-                            <PathIcon Data="M12 4V20M4 12H20" Width="16" Height="16" Foreground="White"/>
-                            <TextBlock Text="New Build" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </Button>
-
                     <Button Command="{Binding SaveBuildCommand}"
                             ToolTip.Tip="Save Current Build"
                             Padding="12,8"
@@ -224,63 +211,182 @@
         </Border>
 
         <!-- Main Content (shown when workspace loaded) -->
-        <Grid Grid.Row="1" ColumnDefinitions="280,*" IsVisible="{Binding HasWorkspaceLoaded}">
+        <Grid Grid.Row="1" ColumnDefinitions="240,*" IsVisible="{Binding HasWorkspaceLoaded}">
 
-            <!-- Build List Sidebar -->
+            <!-- Section Navigation Sidebar -->
             <Border Grid.Column="0"
                     Background="{StaticResource GlassPanelTranslucentBrush}"
                     BorderBrush="{StaticResource GlassBorderBrush}"
                     BorderThickness="0,0,1,0"
                     Padding="12">
                 <Grid RowDefinitions="Auto,Auto,*">
-                    <TextBlock Grid.Row="0"
-                               Text="Builds"
-                               FontSize="18"
+
+                    <!-- Build Summary Card -->
+                    <Border Grid.Row="0"
+                            Background="{StaticResource GlassPanelBrush}"
+                            BorderBrush="{StaticResource GlassBorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Padding="16"
+                            Margin="0,0,0,16">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="{Binding SelectedBuild.BuildNumber}"
+                                       FontSize="16"
+                                       FontWeight="SemiBold"
+                                       TextTrimming="CharacterEllipsis"
+                                       Foreground="{StaticResource GlassTextBrush}"/>
+                            <TextBlock Text="{Binding SelectedBuild.Device}"
+                                       FontSize="13"
+                                       Foreground="{StaticResource GlassSubtleTextBrush}"/>
+                            <TextBlock Text="{Binding SelectedBuild.BuildDate, StringFormat={}{0:yyyy-MM-dd}}"
+                                       FontSize="11"
+                                       Foreground="{StaticResource GlassSubtleTextBrush}"
+                                       Margin="0,2,0,0"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Section Title -->
+                    <TextBlock Grid.Row="1"
+                               Text="SECTIONS"
+                               FontSize="11"
                                FontWeight="SemiBold"
-                               Margin="0,0,0,12"/>
+                               Foreground="{StaticResource GlassSubtleTextBrush}"
+                               Margin="4,0,0,8"/>
 
-                    <!-- Search Box -->
-                    <TextBox Grid.Row="1"
-                             Text="{Binding SearchText}"
-                             Watermark="Search builds..."
-                             Margin="0,0,0,12"
-                             CornerRadius="4"/>
+                    <!-- Navigation Items -->
+                    <StackPanel Grid.Row="2" Spacing="2">
 
-                    <!-- Build List -->
-                    <ListBox Grid.Row="2"
-                             ItemsSource="{Binding Builds}"
-                             SelectedItem="{Binding SelectedBuild}"
-                             Background="Transparent"
-                             BorderThickness="0">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate DataType="m:BuildProject">
-                                <Border Background="{StaticResource GlassPanelBrush}"
-                                        BorderBrush="{StaticResource GlassBorderBrush}"
-                                        BorderThickness="1"
-                                        CornerRadius="6"
-                                        Padding="12"
-                                        Margin="0,0,0,8">
-                                    <Grid RowDefinitions="Auto,Auto,Auto">
-                                        <TextBlock Grid.Row="0"
-                                                   Text="{Binding BuildNumber}"
-                                                   FontWeight="SemiBold"
-                                                   FontSize="14"
-                                                   TextTrimming="CharacterEllipsis"/>
-                                        <TextBlock Grid.Row="1"
-                                                   Text="{Binding Device}"
-                                                   Foreground="{StaticResource GlassSubtleTextBrush}"
-                                                   FontSize="12"
-                                                   Margin="0,4,0,0"/>
-                                        <TextBlock Grid.Row="2"
-                                                   Text="{Binding BuildDate, StringFormat={}{0:yyyy-MM-dd}}"
-                                                   Foreground="{StaticResource GlassSubtleTextBrush}"
-                                                   FontSize="11"
-                                                   Margin="0,2,0,0"/>
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
+                        <!-- Build Info -->
+                        <Button Command="{Binding NavigateToSectionCommand}"
+                                CommandParameter="0"
+                                Classes="nav-item"
+                                Background="{Binding IsBuildInfoActive, Converter={StaticResource ActiveNavBackgroundConverter}}"
+                                Padding="12,10"
+                                HorizontalContentAlignment="Stretch"
+                                HorizontalAlignment="Stretch"
+                                CornerRadius="6">
+                            <Grid ColumnDefinitions="24,*,Auto">
+                                <PathIcon Grid.Column="0"
+                                          Data="M13 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V9L13 2ZM18 20H6V4H12V10H18V20Z"
+                                          Width="16" Height="16"
+                                          Foreground="{Binding IsBuildInfoActive, Converter={StaticResource ActiveNavForegroundConverter}}"/>
+                                <TextBlock Grid.Column="1"
+                                           Text="Build Info"
+                                           FontSize="14"
+                                           VerticalAlignment="Center"
+                                           Margin="8,0,0,0"
+                                           Foreground="{Binding IsBuildInfoActive, Converter={StaticResource ActiveNavForegroundConverter}}"/>
+                                <Ellipse Grid.Column="2"
+                                         Width="8" Height="8"
+                                         Fill="{StaticResource GlassAppleRedBrush}"
+                                         IsVisible="{Binding HasBuildInfoIssues}"
+                                         VerticalAlignment="Center"/>
+                            </Grid>
+                        </Button>
+
+                        <!-- Changelog -->
+                        <Button Command="{Binding NavigateToSectionCommand}"
+                                CommandParameter="1"
+                                Classes="nav-item"
+                                Background="{Binding IsChangelogActive, Converter={StaticResource ActiveNavBackgroundConverter}}"
+                                Padding="12,10"
+                                HorizontalContentAlignment="Stretch"
+                                HorizontalAlignment="Stretch"
+                                CornerRadius="6">
+                            <Grid ColumnDefinitions="24,*">
+                                <PathIcon Grid.Column="0"
+                                          Data="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2ZM16 18H8V16H16V18ZM16 14H8V12H16V14ZM13 9V3.5L18.5 9H13Z"
+                                          Width="16" Height="16"
+                                          Foreground="{Binding IsChangelogActive, Converter={StaticResource ActiveNavForegroundConverter}}"/>
+                                <TextBlock Grid.Column="1"
+                                           Text="Changelog"
+                                           FontSize="14"
+                                           VerticalAlignment="Center"
+                                           Margin="8,0,0,0"
+                                           Foreground="{Binding IsChangelogActive, Converter={StaticResource ActiveNavForegroundConverter}}"/>
+                            </Grid>
+                        </Button>
+
+                        <!-- Issues -->
+                        <Button Command="{Binding NavigateToSectionCommand}"
+                                CommandParameter="2"
+                                Classes="nav-item"
+                                Background="{Binding IsIssuesActive, Converter={StaticResource ActiveNavBackgroundConverter}}"
+                                Padding="12,10"
+                                HorizontalContentAlignment="Stretch"
+                                HorizontalAlignment="Stretch"
+                                CornerRadius="6">
+                            <Grid ColumnDefinitions="24,*">
+                                <PathIcon Grid.Column="0"
+                                          Data="M12 2C6.48 2 2 6.48 2 12S6.48 22 12 22 22 17.52 22 12 17.52 2 12 2ZM13 17H11V15H13V17ZM13 13H11V7H13V13Z"
+                                          Width="16" Height="16"
+                                          Foreground="{Binding IsIssuesActive, Converter={StaticResource ActiveNavForegroundConverter}}"/>
+                                <TextBlock Grid.Column="1"
+                                           Text="Issues"
+                                           FontSize="14"
+                                           VerticalAlignment="Center"
+                                           Margin="8,0,0,0"
+                                           Foreground="{Binding IsIssuesActive, Converter={StaticResource ActiveNavForegroundConverter}}"/>
+                            </Grid>
+                        </Button>
+
+                        <!-- Testing -->
+                        <Button Command="{Binding NavigateToSectionCommand}"
+                                CommandParameter="3"
+                                Classes="nav-item"
+                                Background="{Binding IsTestingActive, Converter={StaticResource ActiveNavBackgroundConverter}}"
+                                Padding="12,10"
+                                HorizontalContentAlignment="Stretch"
+                                HorizontalAlignment="Stretch"
+                                CornerRadius="6">
+                            <Grid ColumnDefinitions="24,*,Auto">
+                                <PathIcon Grid.Column="0"
+                                          Data="M12 2C6.48 2 2 6.48 2 12S6.48 22 12 22 22 17.52 22 12 17.52 2 12 2ZM10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z"
+                                          Width="16" Height="16"
+                                          Foreground="{Binding IsTestingActive, Converter={StaticResource ActiveNavForegroundConverter}}"/>
+                                <TextBlock Grid.Column="1"
+                                           Text="Testing"
+                                           FontSize="14"
+                                           VerticalAlignment="Center"
+                                           Margin="8,0,0,0"
+                                           Foreground="{Binding IsTestingActive, Converter={StaticResource ActiveNavForegroundConverter}}"/>
+                                <Ellipse Grid.Column="2"
+                                         Width="8" Height="8"
+                                         Fill="{StaticResource GlassAppleRedBrush}"
+                                         IsVisible="{Binding HasTestingIssues}"
+                                         VerticalAlignment="Center"/>
+                            </Grid>
+                        </Button>
+
+                        <!-- Release -->
+                        <Button Command="{Binding NavigateToSectionCommand}"
+                                CommandParameter="4"
+                                Classes="nav-item"
+                                Background="{Binding IsReleaseActive, Converter={StaticResource ActiveNavBackgroundConverter}}"
+                                Padding="12,10"
+                                HorizontalContentAlignment="Stretch"
+                                HorizontalAlignment="Stretch"
+                                CornerRadius="6">
+                            <Grid ColumnDefinitions="24,*,Auto">
+                                <PathIcon Grid.Column="0"
+                                          Data="M19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3ZM19 19H5V5H19V19ZM17.99 9L16.58 7.58L9.99 14.17L7.41 11.6L5.99 13.01L9.99 17L17.99 9Z"
+                                          Width="16" Height="16"
+                                          Foreground="{Binding IsReleaseActive, Converter={StaticResource ActiveNavForegroundConverter}}"/>
+                                <TextBlock Grid.Column="1"
+                                           Text="Release"
+                                           FontSize="14"
+                                           VerticalAlignment="Center"
+                                           Margin="8,0,0,0"
+                                           Foreground="{Binding IsReleaseActive, Converter={StaticResource ActiveNavForegroundConverter}}"/>
+                                <Ellipse Grid.Column="2"
+                                         Width="8" Height="8"
+                                         Fill="{StaticResource GlassAppleRedBrush}"
+                                         IsVisible="{Binding HasReleaseIssues}"
+                                         VerticalAlignment="Center"/>
+                            </Grid>
+                        </Button>
+
+                    </StackPanel>
                 </Grid>
             </Border>
 
@@ -294,6 +400,11 @@
                 <!-- Editor Tabs -->
                 <Border Grid.Column="0" Padding="16">
                     <TabControl SelectedIndex="{Binding SelectedTabIndex}">
+                        <TabControl.Styles>
+                            <Style Selector="TabControl /template/ ItemsPresenter">
+                                <Setter Property="IsVisible" Value="False"/>
+                            </Style>
+                        </TabControl.Styles>
 
                         <!-- Build Info Tab -->
                         <TabItem Header="Build Info">
