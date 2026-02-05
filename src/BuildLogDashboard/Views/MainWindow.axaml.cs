@@ -9,12 +9,13 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
 
-        // Set up StorageProvider for file dialogs
+        // Set up StorageProvider and MainWindow reference for dialogs
         this.Loaded += (s, e) =>
         {
             if (DataContext is MainWindowViewModel vm)
             {
                 vm.StorageProvider = this.StorageProvider;
+                vm.MainWindow = this;
             }
         };
     }

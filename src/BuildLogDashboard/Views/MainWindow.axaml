@@ -63,7 +63,7 @@
                             Classes="btn-save"
                             Background="{Binding IsSaved, Converter={StaticResource SaveButtonBackgroundConverter}}"
                             Foreground="White"
-                            IsEnabled="{Binding HasWorkspaceLoaded}">
+                            IsEnabled="{Binding CanSave}">
                         <Panel>
                             <!-- Unsaved state: Save icon + "Save" -->
                             <StackPanel Orientation="Horizontal" Spacing="6"
@@ -101,7 +101,7 @@
                             Classes="btn-success"
                             Background="{StaticResource GlassSuccessBrush}"
                             Foreground="White"
-                            IsEnabled="{Binding HasWorkspaceLoaded}">
+                            IsEnabled="{Binding CanExport}">
                         <Button.Flyout>
                             <MenuFlyout Placement="Bottom">
                                 <MenuItem Header="Export as Markdown (.md)" Command="{Binding ExportMarkdownCommand}">
@@ -317,11 +317,10 @@
                                             <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding SelectedBuild.Device}" Margin="0,0,0,12"/>
 
                                             <TextBlock Grid.Row="1" Grid.Column="3" Text="Build Type" VerticalAlignment="Center" Foreground="{StaticResource GlassSubtleTextBrush}"/>
-                                            <ComboBox Grid.Row="1" Grid.Column="4" SelectedItem="{Binding SelectedBuild.BuildType}" Margin="0,0,0,12">
-                                                <ComboBoxItem Content="user"/>
-                                                <ComboBoxItem Content="userdebug"/>
-                                                <ComboBoxItem Content="eng"/>
-                                            </ComboBox>
+                                            <ComboBox Grid.Row="1" Grid.Column="4"
+                                                      ItemsSource="{x:Static m:BuildProject.BuildTypeOptions}"
+                                                      SelectedItem="{Binding SelectedBuild.BuildType}"
+                                                      Margin="0,0,0,12"/>
 
                                             <TextBlock Grid.Row="2" Grid.Column="0" Text="Android Version" VerticalAlignment="Center" Foreground="{StaticResource GlassSubtleTextBrush}"/>
                                             <ComboBox Grid.Row="2" Grid.Column="1"
@@ -345,6 +344,30 @@
 
                                             <TextBlock Grid.Row="3" Grid.Column="3" Text="Previous Build" VerticalAlignment="Center" Foreground="{StaticResource GlassSubtleTextBrush}"/>
                                             <TextBox Grid.Row="3" Grid.Column="4" Text="{Binding SelectedBuild.PreviousBuild}" Margin="0,0,0,12"/>
+
+                                            <!-- Validation Warnings -->
+                                            <StackPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="5" Margin="0,8,0,0">
+                                                <TextBlock Text="* Required: Build Number is empty"
+                                                           Foreground="{StaticResource GlassErrorColor}"
+                                                           FontSize="11"
+                                                           IsVisible="{Binding SelectedBuild.IsBuildNumberInvalid}"
+                                                           Margin="0,2"/>
+                                                <TextBlock Text="* Required: Device is empty or TBD"
+                                                           Foreground="{StaticResource GlassErrorColor}"
+                                                           FontSize="11"
+                                                           IsVisible="{Binding SelectedBuild.IsDeviceInvalid}"
+                                                           Margin="0,2"/>
+                                                <TextBlock Text="* Required: Android Version must be selected"
+                                                           Foreground="{StaticResource GlassErrorColor}"
+                                                           FontSize="11"
+                                                           IsVisible="{Binding SelectedBuild.IsAndroidVersionInvalid}"
+                                                           Margin="0,2"/>
+                                                <TextBlock Text="* Required: Build Type must be selected"
+                                                           Foreground="{StaticResource GlassErrorColor}"
+                                                           FontSize="11"
+                                                           IsVisible="{Binding SelectedBuild.IsBuildTypeInvalid}"
+                                                           Margin="0,2"/>
+                                            </StackPanel>
                                         </Grid>
                                     </Border>
 
@@ -594,6 +617,24 @@
                                                 </DataGridTemplateColumn>
                                             </DataGrid.Columns>
                                         </DataGrid>
+                                        <!-- Validation Warnings for Testing -->
+                                        <StackPanel Margin="0,12,0,0">
+                                            <TextBlock Text="* Required: Boot Test result is still Pending"
+                                                       Foreground="{StaticResource GlassErrorColor}"
+                                                       FontSize="11"
+                                                       IsVisible="{Binding SelectedBuild.IsBootTestInvalid}"
+                                                       Margin="0,2"/>
+                                            <TextBlock Text="* Required: Basic Functionality result is still Pending"
+                                                       Foreground="{StaticResource GlassErrorColor}"
+                                                       FontSize="11"
+                                                       IsVisible="{Binding SelectedBuild.IsBasicFunctionalityInvalid}"
+                                                       Margin="0,2"/>
+                                            <TextBlock Text="* Required: OTA Update Test result is still Pending"
+                                                       Foreground="{StaticResource GlassErrorColor}"
+                                                       FontSize="11"
+                                                       IsVisible="{Binding SelectedBuild.IsOtaTestInvalid}"
+                                                       Margin="0,2"/>
+                                        </StackPanel>
                                     </StackPanel>
                                 </Border>
                             </ScrollViewer>
@@ -629,8 +670,29 @@
                                             Padding="20">
                                         <StackPanel>
                                             <TextBlock Text="Recommended For" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,12"/>
-                                            <CheckBox Content="Internal Testing" IsChecked="{Binding SelectedBuild.InternalTesting}" Margin="0,0,0,8"/>
-                                            <CheckBox Content="Customer Release" IsChecked="{Binding SelectedBuild.CustomerRelease}" Margin="0,0,0,12"/>
+                                            <CheckBox IsChecked="{Binding SelectedBuild.InternalTesting}" Margin="0,0,0,8">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="&#x2713; " Foreground="{StaticResource GlassSuccessBrush}"
+                                                               IsVisible="{Binding SelectedBuild.InternalTesting}"/>
+                                                    <TextBlock Text="&#x2717; " Foreground="{StaticResource GlassErrorColor}"
+                                                               IsVisible="{Binding !SelectedBuild.InternalTesting}"/>
+                                                    <TextBlock Text="Internal Testing"/>
+                                                </StackPanel>
+                                            </CheckBox>
+                                            <CheckBox IsChecked="{Binding SelectedBuild.CustomerRelease}" Margin="0,0,0,12">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="&#x2713; " Foreground="{StaticResource GlassSuccessBrush}"
+                                                               IsVisible="{Binding SelectedBuild.CustomerRelease}"/>
+                                                    <TextBlock Text="&#x2717; " Foreground="{StaticResource GlassErrorColor}"
+                                                               IsVisible="{Binding !SelectedBuild.CustomerRelease}"/>
+                                                    <TextBlock Text="Customer Release"/>
+                                                </StackPanel>
+                                            </CheckBox>
+                                            <TextBlock Text="* Required: At least one option must be selected"
+                                                       Foreground="{StaticResource GlassErrorColor}"
+                                                       FontSize="11"
+                                                       IsVisible="{Binding SelectedBuild.IsRecommendedForInvalid}"
+                                                       Margin="0,0,0,12"/>
                                             <Grid ColumnDefinitions="150,*">
                                                 <TextBlock Grid.Column="0" Text="Specific Customer" VerticalAlignment="Center" Foreground="{StaticResource GlassSubtleTextBrush}"/>
                                                 <TextBox Grid.Column="1" Text="{Binding SelectedBuild.SpecificCustomer}"/>
@@ -661,7 +723,7 @@
                                             Padding="20">
                                         <StackPanel>
                                             <TextBlock Text="Build Engineer" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,12"/>
-                                            <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="150,*">
+                                            <Grid RowDefinitions="Auto,Auto,Auto,Auto" ColumnDefinitions="150,*">
                                                 <TextBlock Grid.Row="0" Grid.Column="0" Text="Built by" VerticalAlignment="Center" Foreground="{StaticResource GlassSubtleTextBrush}"/>
                                                 <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding SelectedBuild.BuiltBy}" Margin="0,0,0,12"/>
 
@@ -669,7 +731,26 @@
                                                 <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding SelectedBuild.ReviewedBy}" Margin="0,0,0,12"/>
 
                                                 <TextBlock Grid.Row="2" Grid.Column="0" Text="Approved Date" VerticalAlignment="Center" Foreground="{StaticResource GlassSubtleTextBrush}"/>
-                                                <CalendarDatePicker Grid.Row="2" Grid.Column="1" SelectedDate="{Binding SelectedBuild.ApprovedForReleaseDate}"/>
+                                                <CalendarDatePicker Grid.Row="2" Grid.Column="1" SelectedDate="{Binding SelectedBuild.ApprovedForReleaseDate}" Margin="0,0,0,12"/>
+
+                                                <!-- Validation Warnings -->
+                                                <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2">
+                                                    <TextBlock Text="* Required: Built by is empty"
+                                                               Foreground="{StaticResource GlassErrorColor}"
+                                                               FontSize="11"
+                                                               IsVisible="{Binding SelectedBuild.IsBuiltByInvalid}"
+                                                               Margin="0,2"/>
+                                                    <TextBlock Text="* Required: Reviewed by is empty"
+                                                               Foreground="{StaticResource GlassErrorColor}"
+                                                               FontSize="11"
+                                                               IsVisible="{Binding SelectedBuild.IsReviewedByInvalid}"
+                                                               Margin="0,2"/>
+                                                    <TextBlock Text="* Required: Approved Date must be selected"
+                                                               Foreground="{StaticResource GlassErrorColor}"
+                                                               FontSize="11"
+                                                               IsVisible="{Binding SelectedBuild.IsApprovedDateInvalid}"
+                                                               Margin="0,2"/>
+                                                </StackPanel>
                                             </Grid>
                                         </StackPanel>
                                     </Border>

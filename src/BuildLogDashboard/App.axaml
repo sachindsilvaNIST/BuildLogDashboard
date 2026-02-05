@@ -29,7 +29,7 @@
 
         <!-- Hand cursor for all buttons -->
         <Style Selector="Button">
-            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Cursor" Value="Arrow"/>
         </Style>
 
         <!-- Button Base Styles with Transitions -->

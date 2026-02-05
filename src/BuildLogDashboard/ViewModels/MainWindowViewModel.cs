@@ -21,6 +21,9 @@ public partial class MainWindowViewModel : ViewModelBase
     // Default starting directory for file dialogs
     private const string DefaultStartDirectory = "/home/sankyo/Sachin Files/01 NIST - AEM979/NIST - Resources (ALL) [NIST - RESOURCE &  PERMISSION/GPN600-001 RESOURCES/[GPN600-001] Android Images";
 
+    // Default export directory for saving files
+    private const string DefaultExportDirectory = "/home/sankyo/Sachin Files/01 NIST - AEM979/NIST - Resources (ALL) [NIST - RESOURCE &  PERMISSION/GPN600-001 RESOURCES/[GPN600-001] Android Image Build Documentations";
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasWorkspaceLoaded))]
     private string _workspacePath = string.Empty;
@@ -62,8 +65,17 @@ public partial class MainWindowViewModel : ViewModelBase
     // Computed property for button enable state
     public bool HasWorkspaceLoaded => HasBuildsLoaded || !string.IsNullOrEmpty(WorkspacePath);
 
+    // Save button enabled only if no validation errors
+    public bool CanSave => HasWorkspaceLoaded && SelectedBuild != null && !SelectedBuild.HasValidationErrors;
+
+    // Export button enabled only if no validation errors
+    public bool CanExport => HasWorkspaceLoaded && SelectedBuild != null && !SelectedBuild.HasValidationErrors;
+
     // For file dialog
     public IStorageProvider? StorageProvider { get; set; }
+
+    // For showing dialogs
+    public Avalonia.Controls.Window? MainWindow { get; set; }
 
     public MainWindowViewModel()
     {
@@ -95,6 +107,10 @@ public partial class MainWindowViewModel : ViewModelBase
 
         // Reset saved state when switching builds
         IsSaved = false;
+
+        // Update button enable states
+        OnPropertyChanged(nameof(CanSave));
+        OnPropertyChanged(nameof(CanExport));
     }
 
     private void SubscribeToCollections(BuildProject build)
@@ -144,12 +160,36 @@ public partial class MainWindowViewModel : ViewModelBase
             }
         }
 
+        // Refresh test validation if TestResults collection changed
+        if (sender == SelectedBuild?.TestResults)
+        {
+            SelectedBuild?.RefreshTestValidation();
+            OnPropertyChanged(nameof(CanSave));
+            OnPropertyChanged(nameof(CanExport));
+        }
+
         // Mark as unsaved when collection changes
         IsSaved = false;
     }
 
     private void OnBuildPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
+        // Refresh test validation when test result changes
+        if (sender is TestResult && e.PropertyName == nameof(TestResult.Result))
+        {
+            SelectedBuild?.RefreshTestValidation();
+            OnPropertyChanged(nameof(CanSave));
+            OnPropertyChanged(nameof(CanExport));
+        }
+
+        // Update button states when validation-related properties change
+        if (e.PropertyName == nameof(BuildProject.HasValidationErrors) ||
+            e.PropertyName?.StartsWith("Is") == true)  // IsXxxInvalid properties
+        {
+            OnPropertyChanged(nameof(CanSave));
+            OnPropertyChanged(nameof(CanExport));
+        }
+
         // Don't mark as unsaved for LastUpdated changes (that's set during save)
         if (e.PropertyName != nameof(BuildProject.LastUpdated))
         {
@@ -282,138 +322,187 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private async Task ExportMarkdownAsync()
     {
-        if (SelectedBuild == null || StorageProvider == null) return;
+        if (SelectedBuild == null || MainWindow == null) return;
 
         var suggestedName = string.IsNullOrEmpty(SelectedBuild.BuildNumber)
             ? "BUILD_LOG.md"
             : $"BUILD_LOG_{SelectedBuild.BuildNumber}.md";
 
-        var file = await StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+        var defaultFilePath = System.IO.Path.Combine(DefaultExportDirectory, suggestedName);
+
+        // Generate preview content
+        var previewContent = _projectManager.GeneratePreview(SelectedBuild);
+
+        // Show preview dialog with integrated save location
+        var previewWindow = new Views.ExportPreviewWindow();
+        previewWindow.SetPreviewContent(previewContent, "Markdown (.md)", defaultFilePath, ".md");
+        await previewWindow.ShowDialog(MainWindow);
+
+        if (!previewWindow.IsConfirmed)
         {
-            Title = "Export as Markdown",
-            SuggestedFileName = suggestedName,
-            FileTypeChoices = new[]
-            {
-                new FilePickerFileType("Markdown") { Patterns = new[] { "*.md" } }
-            }
-        });
+            StatusMessage = "Export cancelled";
+            return;
+        }
 
-        if (file != null)
+        var filePath = previewWindow.FilePath;
+        if (string.IsNullOrEmpty(filePath))
         {
-            IsBusy = true;
-            BusyMessage = "Exporting...";
-            StatusMessage = "Exporting...";
+            StatusMessage = "Export cancelled - no file path specified";
+            return;
+        }
 
-            try
-            {
-                await _projectManager.ExportAsMarkdownAsync(SelectedBuild, file.Path.LocalPath);
+        IsBusy = true;
+        BusyMessage = "Exporting...";
+        StatusMessage = "Exporting...";
 
-                // Add 2-second delay for visual feedback
-                await Task.Delay(2000);
+        try
+        {
+            await _projectManager.ExportAsMarkdownAsync(SelectedBuild, filePath);
 
-                StatusMessage = $"Exported to {file.Name}";
-            }
-            catch (Exception ex)
-            {
-                StatusMessage = $"Export failed: {ex.Message}";
-            }
-            finally
-            {
-                IsBusy = false;
-            }
+            // Add 2-second delay for visual feedback
+            await Task.Delay(2000);
+
+            StatusMessage = $"Exported to {System.IO.Path.GetFileName(filePath)}";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Export failed: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
         }
     }
 
     [RelayCommand]
     private async Task ExportHtmlAsync()
     {
-        if (SelectedBuild == null || StorageProvider == null) return;
+        if (SelectedBuild == null || MainWindow == null) return;
 
         var suggestedName = string.IsNullOrEmpty(SelectedBuild.BuildNumber)
             ? "BUILD_LOG.html"
             : $"BUILD_LOG_{SelectedBuild.BuildNumber}.html";
 
-        var file = await StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+        var defaultFilePath = System.IO.Path.Combine(DefaultExportDirectory, suggestedName);
+
+        // Generate preview content
+        var previewContent = _projectManager.GeneratePreview(SelectedBuild);
+
+        // Show preview dialog with integrated save location
+        var previewWindow = new Views.ExportPreviewWindow();
+        previewWindow.SetPreviewContent(previewContent, "HTML (.html)", defaultFilePath, ".html");
+        await previewWindow.ShowDialog(MainWindow);
+
+        if (!previewWindow.IsConfirmed)
         {
-            Title = "Export as HTML",
-            SuggestedFileName = suggestedName,
-            FileTypeChoices = new[]
-            {
-                new FilePickerFileType("HTML") { Patterns = new[] { "*.html" } }
-            }
-        });
+            StatusMessage = "Export cancelled";
+            return;
+        }
 
-        if (file != null)
+        var filePath = previewWindow.FilePath;
+        if (string.IsNullOrEmpty(filePath))
         {
-            IsBusy = true;
-            BusyMessage = "Exporting...";
-            StatusMessage = "Exporting...";
+            StatusMessage = "Export cancelled - no file path specified";
+            return;
+        }
 
-            try
-            {
-                SelectedBuild.LastUpdated = DateTime.Now;
-                var html = _htmlGenerator.Generate(SelectedBuild);
-                await System.IO.File.WriteAllTextAsync(file.Path.LocalPath, html);
+        IsBusy = true;
+        BusyMessage = "Exporting...";
+        StatusMessage = "Exporting...";
 
-                // Add 2-second delay for visual feedback
-                await Task.Delay(2000);
+        try
+        {
+            SelectedBuild.LastUpdated = DateTime.Now;
+            var html = _htmlGenerator.Generate(SelectedBuild);
+            await System.IO.File.WriteAllTextAsync(filePath, html);
 
-                StatusMessage = $"Exported to {file.Name}";
-            }
-            catch (Exception ex)
-            {
-                StatusMessage = $"Export failed: {ex.Message}";
-            }
-            finally
-            {
-                IsBusy = false;
-            }
+            // Add 2-second delay for visual feedback
+            await Task.Delay(2000);
+
+            StatusMessage = $"Exported to {System.IO.Path.GetFileName(filePath)}";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Export failed: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
         }
     }
 
     [RelayCommand]
     private async Task ExportPdfAsync()
     {
-        if (SelectedBuild == null || StorageProvider == null) return;
+        if (SelectedBuild == null || MainWindow == null) return;
 
         var suggestedName = string.IsNullOrEmpty(SelectedBuild.BuildNumber)
             ? "BUILD_LOG.pdf"
             : $"BUILD_LOG_{SelectedBuild.BuildNumber}.pdf";
 
-        var file = await StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+        var defaultFilePath = System.IO.Path.Combine(DefaultExportDirectory, suggestedName);
+
+        // Generate preview content
+        var previewContent = _projectManager.GeneratePreview(SelectedBuild);
+
+        // Show preview dialog with integrated save location
+        var previewWindow = new Views.ExportPreviewWindow();
+        previewWindow.SetPreviewContent(previewContent, "PDF (.pdf)", defaultFilePath, ".pdf");
+        await previewWindow.ShowDialog(MainWindow);
+
+        if (!previewWindow.IsConfirmed)
         {
-            Title = "Export as PDF",
-            SuggestedFileName = suggestedName,
-            FileTypeChoices = new[]
-            {
-                new FilePickerFileType("PDF") { Patterns = new[] { "*.pdf" } }
-            }
-        });
+            StatusMessage = "Export cancelled";
+            return;
+        }
 
-        if (file != null)
+        var filePath = previewWindow.FilePath;
+        if (string.IsNullOrEmpty(filePath))
         {
-            IsBusy = true;
-            BusyMessage = "Exporting...";
-            StatusMessage = "Exporting...";
+            StatusMessage = "Export cancelled - no file path specified";
+            return;
+        }
 
-            try
-            {
-                SelectedBuild.LastUpdated = DateTime.Now;
-                await Task.Run(() => _pdfGenerator.Generate(SelectedBuild, file.Path.LocalPath));
+        IsBusy = true;
+        BusyMessage = "Generating PDF...";
+        StatusMessage = "Generating PDF...";
 
-                // Add 2-second delay for visual feedback
-                await Task.Delay(2000);
+        try
+        {
+            SelectedBuild.LastUpdated = DateTime.Now;
 
-                StatusMessage = $"Exported to {file.Name}";
-            }
-            catch (Exception ex)
+            // Run PDF generation on background thread with explicit error capture
+            var pdfError = await Task.Run(() =>
             {
-                StatusMessage = $"Export failed: {ex.Message}";
-            }
-            finally
+                try
+                {
+                    _pdfGenerator.Generate(SelectedBuild, filePath);
+                    return (string?)null;
+                }
+                catch (Exception pdfEx)
+                {
+                    return pdfEx.Message;
+                }
+            });
+
+            if (pdfError != null)
             {
-                IsBusy = false;
+                StatusMessage = $"PDF generation failed: {pdfError}";
+                return;
             }
+
+            // Add 2-second delay for visual feedback
+            await Task.Delay(2000);
+
+            StatusMessage = $"Exported to {System.IO.Path.GetFileName(filePath)}";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Export failed: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
         }
     }
 

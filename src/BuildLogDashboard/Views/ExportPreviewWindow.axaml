@@ -1,0 +1,110 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:md="clr-namespace:Markdown.Avalonia;assembly=Markdown.Avalonia"
+        x:Class="BuildLogDashboard.Views.ExportPreviewWindow"
+        Title="Export Preview"
+        Width="900" Height="750"
+        WindowStartupLocation="CenterOwner"
+        CanResize="True"
+        MinWidth="700" MinHeight="550"
+        Background="#F5F5F7">
+
+    <Grid RowDefinitions="Auto,*,Auto,Auto">
+        <!-- Header -->
+        <Border Grid.Row="0"
+                Background="White"
+                BorderBrush="#E0E0E0"
+                BorderThickness="0,0,0,1"
+                Padding="20,16">
+            <StackPanel>
+                <TextBlock Text="Export Preview"
+                           FontSize="20"
+                           FontWeight="SemiBold"
+                           Foreground="#1A1A1A"/>
+                <TextBlock x:Name="ExportTypeText"
+                           Text="Review before exporting"
+                           FontSize="13"
+                           Foreground="#666666"
+                           Margin="0,4,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Preview Content -->
+        <Border Grid.Row="1" Margin="20,16,20,8">
+            <Border Background="White"
+                    CornerRadius="8"
+                    BoxShadow="0 2 12 0 #20000000">
+                <ScrollViewer Padding="32,24">
+                    <md:MarkdownScrollViewer x:Name="PreviewMarkdown"
+                                             SaveScrollValueWhenContentUpdated="True"/>
+                </ScrollViewer>
+            </Border>
+        </Border>
+
+        <!-- Save Location Section -->
+        <Border Grid.Row="2"
+                Background="White"
+                BorderBrush="#E0E0E0"
+                BorderThickness="0,1,0,0"
+                Padding="20,12">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+                <TextBlock Grid.Column="0"
+                           Text="Save to:"
+                           VerticalAlignment="Center"
+                           FontWeight="SemiBold"
+                           Foreground="#1A1A1A"
+                           Margin="0,0,12,0"/>
+                <TextBox Grid.Column="1"
+                         x:Name="FilePathTextBox"
+                         VerticalAlignment="Center"
+                         Background="#FAFAFA"
+                         BorderBrush="#D0D0D0"
+                         CornerRadius="4"
+                         Padding="10,8"
+                         FontSize="12"/>
+                <Button Grid.Column="2"
+                        x:Name="BrowseButton"
+                        Content="Browse..."
+                        Padding="16,8"
+                        Margin="12,0,0,0"
+                        Background="#007AFF"
+                        Foreground="White"
+                        CornerRadius="6"
+                        Click="OnBrowseClick"/>
+            </Grid>
+        </Border>
+
+        <!-- Footer with buttons -->
+        <Border Grid.Row="3"
+                Background="White"
+                BorderBrush="#E0E0E0"
+                BorderThickness="0,1,0,0"
+                Padding="20,16">
+            <Grid ColumnDefinitions="*,Auto,Auto">
+                <TextBlock Grid.Column="0"
+                           x:Name="StatusText"
+                           VerticalAlignment="Center"
+                           Foreground="#666666"
+                           FontSize="12"
+                           TextTrimming="CharacterEllipsis"/>
+                <Button Grid.Column="1"
+                        x:Name="CancelButton"
+                        Content="Cancel"
+                        Padding="24,10"
+                        Margin="0,0,12,0"
+                        Background="#D13438"
+                        Foreground="White"
+                        CornerRadius="6"
+                        Click="OnCancelClick"/>
+                <Button Grid.Column="2"
+                        x:Name="ConfirmButton"
+                        Content="Confirm Export"
+                        Padding="24,10"
+                        Background="#107C10"
+                        Foreground="White"
+                        CornerRadius="6"
+                        Click="OnConfirmClick"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

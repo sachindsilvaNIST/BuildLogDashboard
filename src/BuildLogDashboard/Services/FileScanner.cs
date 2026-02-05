@@ -120,6 +120,8 @@ public class FileScanner
                 project.Device = parsed.Value.device.Replace("_", "-").ToUpperInvariant();
                 // Set build number to include date and time: buildnum.date.time
                 project.BuildNumber = $"{parsed.Value.buildNumber}.{parsed.Value.date}.{parsed.Value.time}";
+                // Mark as auto-completed to skip validation for these fields
+                project.WasAutoCompleted = true;
 
                 // Parse date from format YYYYMMDD
                 if (DateTime.TryParseExact(parsed.Value.date, "yyyyMMdd",

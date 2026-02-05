@@ -10,7 +10,8 @@ namespace BuildLogDashboard.Services;
 public class PdfGenerator
 {
     // Colors
-    private static readonly string HeadingColor = "#01548c";  // Blue for headings
+    private static readonly string HeadingColor = "#01548c";  // Blue for side headings
+    private static readonly string MainHeadingColor = "#888888";  // Faded gray for main heading
     private static readonly string TextColor = "#1A1A1A";
     private static readonly string SubtleColor = "#666666";
     private static readonly string BorderColor = "#E0E0E0";
@@ -31,7 +32,7 @@ public class PdfGenerator
             {
                 page.Size(PageSizes.A4);
                 page.Margin(50);
-                page.DefaultTextStyle(x => x.FontSize(10).FontColor(TextColor).FontFamily("Inter"));
+                page.DefaultTextStyle(x => x.FontSize(11).FontColor(TextColor).FontFamily("Inter"));
 
                 page.Header().Element(c => ComposeHeader(c, project));
                 page.Content().Element(c => ComposeContent(c, project));
@@ -44,8 +45,8 @@ public class PdfGenerator
     {
         container.Column(column =>
         {
-            column.Item().Text($"Android OS Image Build Log").FontSize(24).Bold().FontColor(HeadingColor);
-            column.Item().Text($"Build: {project.BuildNumber}").FontSize(14).FontColor(SubtleColor);
+            column.Item().AlignCenter().Text($"Android OS Image Build Log").FontSize(14).Bold().FontColor(MainHeadingColor);
+            column.Item().AlignCenter().Text($"Build: {project.BuildNumber}").FontSize(11).FontColor(SubtleColor);
             column.Item().PaddingTop(10).LineHorizontal(2).LineColor(HeadingColor);
         });
     }
@@ -93,7 +94,7 @@ public class PdfGenerator
     {
         container.Column(column =>
         {
-            column.Item().Text("Build Information").FontSize(14).Bold().FontColor(TextColor);
+            column.Item().Text("Build Information").FontSize(11).Bold().FontColor(HeadingColor);
             column.Item().PaddingTop(5).LineHorizontal(1).LineColor(BorderColor);
             column.Item().PaddingTop(10).Table(table =>
             {
@@ -125,7 +126,7 @@ public class PdfGenerator
     {
         container.Column(column =>
         {
-            column.Item().Text("Files").FontSize(14).Bold().FontColor(TextColor);
+            column.Item().Text("Files").FontSize(11).Bold().FontColor(HeadingColor);
             column.Item().PaddingTop(5).LineHorizontal(1).LineColor(BorderColor);
             column.Item().PaddingTop(10).Table(table =>
             {
@@ -158,7 +159,7 @@ public class PdfGenerator
     {
         container.Column(column =>
         {
-            column.Item().Text("Changelog").FontSize(14).Bold().FontColor(TextColor);
+            column.Item().Text("Changelog").FontSize(11).Bold().FontColor(HeadingColor);
             column.Item().PaddingTop(5).LineHorizontal(1).LineColor(BorderColor);
 
             // App Updates
@@ -239,7 +240,7 @@ public class PdfGenerator
     {
         container.Column(column =>
         {
-            column.Item().Text("Known Issues").FontSize(14).Bold().FontColor(TextColor);
+            column.Item().Text("Known Issues").FontSize(11).Bold().FontColor(HeadingColor);
             column.Item().PaddingTop(5).LineHorizontal(1).LineColor(BorderColor);
             column.Item().PaddingTop(10).Table(table =>
             {
@@ -282,7 +283,7 @@ public class PdfGenerator
     {
         container.Column(column =>
         {
-            column.Item().Text("Testing Status").FontSize(14).Bold().FontColor(TextColor);
+            column.Item().Text("Testing Status").FontSize(11).Bold().FontColor(HeadingColor);
             column.Item().PaddingTop(5).LineHorizontal(1).LineColor(BorderColor);
             column.Item().PaddingTop(10).Table(table =>
             {
@@ -331,7 +332,7 @@ public class PdfGenerator
     {
         container.Column(column =>
         {
-            column.Item().Text("Dependencies").FontSize(14).Bold().FontColor(TextColor);
+            column.Item().Text("Dependencies").FontSize(11).Bold().FontColor(HeadingColor);
             column.Item().PaddingTop(5).LineHorizontal(1).LineColor(BorderColor);
             column.Item().PaddingTop(10).Row(row =>
             {
@@ -353,12 +354,20 @@ public class PdfGenerator
     {
         container.Column(column =>
         {
-            column.Item().Text("Recommended For").FontSize(14).Bold().FontColor(TextColor);
+            column.Item().Text("Recommended For").FontSize(11).Bold().FontColor(HeadingColor);
             column.Item().PaddingTop(5).LineHorizontal(1).LineColor(BorderColor);
             column.Item().PaddingTop(10).Column(c =>
             {
-                c.Item().Text($"[{(project.InternalTesting ? "X" : " ")}] Internal Testing");
-                c.Item().Text($"[{(project.CustomerRelease ? "X" : " ")}] Customer Release");
+                c.Item().Text(text =>
+                {
+                    text.Span(project.InternalTesting ? "\u2713 " : "\u2717 ").FontColor(project.InternalTesting ? SuccessColor : ErrorColor);
+                    text.Span("Internal Testing");
+                });
+                c.Item().Text(text =>
+                {
+                    text.Span(project.CustomerRelease ? "\u2713 " : "\u2717 ").FontColor(project.CustomerRelease ? SuccessColor : ErrorColor);
+                    text.Span("Customer Release");
+                });
                 if (!string.IsNullOrWhiteSpace(project.SpecificCustomer))
                 {
                     c.Item().PaddingTop(5).Text($"Specific Customer: {project.SpecificCustomer}").FontColor(SubtleColor);
@@ -371,7 +380,7 @@ public class PdfGenerator
     {
         container.Column(column =>
         {
-            column.Item().Text("Customer Release Notes").FontSize(14).Bold().FontColor(TextColor);
+            column.Item().Text("Customer Release Notes").FontSize(11).Bold().FontColor(HeadingColor);
             column.Item().PaddingTop(5).LineHorizontal(1).LineColor(BorderColor);
             column.Item().PaddingTop(10).Text(project.CustomerReleaseNotes);
         });
@@ -381,7 +390,7 @@ public class PdfGenerator
     {
         container.Column(column =>
         {
-            column.Item().Text("Build Engineer").FontSize(14).Bold().FontColor(TextColor);
+            column.Item().Text("Build Engineer").FontSize(11).Bold().FontColor(HeadingColor);
             column.Item().PaddingTop(5).LineHorizontal(1).LineColor(BorderColor);
             column.Item().PaddingTop(10).Table(table =>
             {

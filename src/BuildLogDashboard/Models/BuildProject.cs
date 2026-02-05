@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace BuildLogDashboard.Models;
@@ -9,6 +10,7 @@ public partial class BuildProject : ObservableObject
     // Static options for dropdowns
     public static string[] AndroidVersionOptions => new[] { "TBD", "14", "13", "12", "11", "10", "9", "8.1", "8.0" };
     public static string[] KernelVersionOptions => new[] { "TBD", "5.15", "5.10", "5.4", "4.19", "4.14", "4.9" };
+    public static string[] BuildTypeOptions => new[] { "user", "userdebug", "eng" };
 
     // Build Information
     [ObservableProperty]
@@ -121,6 +123,67 @@ public partial class BuildProject : ObservableObject
     public string ShortName => string.IsNullOrEmpty(BuildNumber)
         ? "New"
         : BuildNumber.Length > 10 ? BuildNumber[..10] + "..." : BuildNumber;
+
+    // Track if this build was auto-completed from files
+    [ObservableProperty]
+    private bool _wasAutoCompleted = false;
+
+    // Validation properties for mandatory fields
+    public bool IsBuildNumberInvalid => !WasAutoCompleted && string.IsNullOrWhiteSpace(BuildNumber);
+    public bool IsDeviceInvalid => !WasAutoCompleted && (string.IsNullOrWhiteSpace(Device) || Device == "TBD");
+    public bool IsAndroidVersionInvalid => string.IsNullOrWhiteSpace(AndroidVersion) || AndroidVersion == "TBD";
+    public bool IsBuildTypeInvalid => string.IsNullOrWhiteSpace(BuildType);
+
+    // Testing validation - check if required tests are still Pending
+    public bool IsBootTestInvalid => TestResults.FirstOrDefault(t => t.TestName == "Boot Test")?.Result == "Pending";
+    public bool IsBasicFunctionalityInvalid => TestResults.FirstOrDefault(t => t.TestName == "Basic Functionality")?.Result == "Pending";
+    public bool IsOtaTestInvalid => TestResults.FirstOrDefault(t => t.TestName == "OTA Update Test")?.Result == "Pending";
+
+    // Recommended For validation - at least one must be checked
+    public bool IsRecommendedForInvalid => !InternalTesting && !CustomerRelease;
+
+    // Build Engineer validation
+    public bool IsBuiltByInvalid => string.IsNullOrWhiteSpace(BuiltBy);
+    public bool IsReviewedByInvalid => string.IsNullOrWhiteSpace(ReviewedBy);
+    public bool IsApprovedDateInvalid => !ApprovedForReleaseDate.HasValue;
+
+    // Overall validation check
+    public bool HasValidationErrors => IsBuildNumberInvalid || IsDeviceInvalid || IsAndroidVersionInvalid ||
+                                       IsBuildTypeInvalid || IsBootTestInvalid || IsBasicFunctionalityInvalid ||
+                                       IsOtaTestInvalid || IsRecommendedForInvalid || IsBuiltByInvalid ||
+                                       IsReviewedByInvalid || IsApprovedDateInvalid;
+
+    // Refresh validation when properties change
+    partial void OnBuildNumberChanged(string value) => NotifyValidationChanged();
+    partial void OnDeviceChanged(string value) => NotifyValidationChanged();
+    partial void OnAndroidVersionChanged(string value) => NotifyValidationChanged();
+    partial void OnBuildTypeChanged(string value) => NotifyValidationChanged();
+    partial void OnInternalTestingChanged(bool value) => NotifyValidationChanged();
+    partial void OnCustomerReleaseChanged(bool value) => NotifyValidationChanged();
+    partial void OnBuiltByChanged(string value) => NotifyValidationChanged();
+    partial void OnReviewedByChanged(string value) => NotifyValidationChanged();
+    partial void OnApprovedForReleaseDateChanged(DateTime? value) => NotifyValidationChanged();
+
+    private void NotifyValidationChanged()
+    {
+        OnPropertyChanged(nameof(IsBuildNumberInvalid));
+        OnPropertyChanged(nameof(IsDeviceInvalid));
+        OnPropertyChanged(nameof(IsAndroidVersionInvalid));
+        OnPropertyChanged(nameof(IsBuildTypeInvalid));
+        OnPropertyChanged(nameof(IsRecommendedForInvalid));
+        OnPropertyChanged(nameof(IsBuiltByInvalid));
+        OnPropertyChanged(nameof(IsReviewedByInvalid));
+        OnPropertyChanged(nameof(IsApprovedDateInvalid));
+        OnPropertyChanged(nameof(HasValidationErrors));
+    }
+
+    public void RefreshTestValidation()
+    {
+        OnPropertyChanged(nameof(IsBootTestInvalid));
+        OnPropertyChanged(nameof(IsBasicFunctionalityInvalid));
+        OnPropertyChanged(nameof(IsOtaTestInvalid));
+        OnPropertyChanged(nameof(HasValidationErrors));
+    }
 
     public BuildProject()
     {
