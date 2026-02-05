@@ -474,9 +474,9 @@
                                                       CornerRadius="4"
                                                       IsReadOnly="True">
                                                 <DataGrid.Columns>
-                                                    <DataGridTextColumn Header="File Name" Binding="{Binding FileName}" Width="250"/>
-                                                    <DataGridTextColumn Header="Size" Binding="{Binding FileSize}" Width="80"/>
-                                                    <DataGridTextColumn Header="SHA256" Binding="{Binding Sha256}" Width="*"/>
+                                                    <DataGridTextColumn Header="File Name" Binding="{Binding FileName}" Width="2*"/>
+                                                    <DataGridTextColumn Header="Size" Binding="{Binding FileSize}" Width="*"/>
+                                                    <DataGridTextColumn Header="SHA256" Binding="{Binding Sha256}" Width="4*"/>
                                                 </DataGrid.Columns>
                                             </DataGrid>
                                         </StackPanel>
