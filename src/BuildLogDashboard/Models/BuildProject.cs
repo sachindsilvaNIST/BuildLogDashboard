@@ -10,7 +10,7 @@ public partial class BuildProject : ObservableObject
     // Static options for dropdowns
     public static string[] AndroidVersionOptions => new[] { "TBD", "14", "13", "12", "11", "10", "9", "8.1", "8.0" };
     public static string[] KernelVersionOptions => new[] { "TBD", "5.15", "5.10", "5.4", "4.19", "4.14", "4.9" };
-    public static string[] BuildTypeOptions => new[] { "user", "userdebug", "eng" };
+    public static string[] BuildTypeOptions => new[] { "-- Select --", "user", "userdebug", "eng" };
 
     // Build Information
     [ObservableProperty]
@@ -23,7 +23,7 @@ public partial class BuildProject : ObservableObject
     private string _device = "TBD";
 
     [ObservableProperty]
-    private string _buildType = "user";
+    private string _buildType = "-- Select --";
 
     [ObservableProperty]
     private string _androidVersion = "TBD";
@@ -132,7 +132,7 @@ public partial class BuildProject : ObservableObject
     public bool IsBuildNumberInvalid => !WasAutoCompleted && string.IsNullOrWhiteSpace(BuildNumber);
     public bool IsDeviceInvalid => !WasAutoCompleted && (string.IsNullOrWhiteSpace(Device) || Device == "TBD");
     public bool IsAndroidVersionInvalid => string.IsNullOrWhiteSpace(AndroidVersion) || AndroidVersion == "TBD";
-    public bool IsBuildTypeInvalid => string.IsNullOrWhiteSpace(BuildType);
+    public bool IsBuildTypeInvalid => string.IsNullOrWhiteSpace(BuildType) || BuildType == "-- Select --";
 
     // Testing validation - check if required tests are still Pending
     public bool IsBootTestInvalid => TestResults.FirstOrDefault(t => t.TestName == "Boot Test")?.Result == "Pending";

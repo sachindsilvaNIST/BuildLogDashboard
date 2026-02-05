@@ -293,6 +293,14 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         if (SelectedBuild == null) return;
 
+        // Check for Build Type validation
+        if (SelectedBuild.IsBuildTypeInvalid && MainWindow != null)
+        {
+            await Views.AlertDialog.ShowAsync(MainWindow, "Build Type Required",
+                "Please select a valid Build Type before saving.\n\nBuild Type cannot be left as '-- Select --'.");
+            return;
+        }
+
         IsBusy = true;
         BusyMessage = "Saving...";
         StatusMessage = "Saving...";
@@ -323,6 +331,14 @@ public partial class MainWindowViewModel : ViewModelBase
     private async Task ExportMarkdownAsync()
     {
         if (SelectedBuild == null || MainWindow == null) return;
+
+        // Check for Build Type validation
+        if (SelectedBuild.IsBuildTypeInvalid)
+        {
+            await Views.AlertDialog.ShowAsync(MainWindow, "Build Type Required",
+                "Please select a valid Build Type before exporting.\n\nBuild Type cannot be left as '-- Select --'.");
+            return;
+        }
 
         var suggestedName = string.IsNullOrEmpty(SelectedBuild.BuildNumber)
             ? "BUILD_LOG.md"
@@ -378,6 +394,14 @@ public partial class MainWindowViewModel : ViewModelBase
     private async Task ExportHtmlAsync()
     {
         if (SelectedBuild == null || MainWindow == null) return;
+
+        // Check for Build Type validation
+        if (SelectedBuild.IsBuildTypeInvalid)
+        {
+            await Views.AlertDialog.ShowAsync(MainWindow, "Build Type Required",
+                "Please select a valid Build Type before exporting.\n\nBuild Type cannot be left as '-- Select --'.");
+            return;
+        }
 
         var suggestedName = string.IsNullOrEmpty(SelectedBuild.BuildNumber)
             ? "BUILD_LOG.html"
@@ -435,6 +459,14 @@ public partial class MainWindowViewModel : ViewModelBase
     private async Task ExportPdfAsync()
     {
         if (SelectedBuild == null || MainWindow == null) return;
+
+        // Check for Build Type validation
+        if (SelectedBuild.IsBuildTypeInvalid)
+        {
+            await Views.AlertDialog.ShowAsync(MainWindow, "Build Type Required",
+                "Please select a valid Build Type before exporting.\n\nBuild Type cannot be left as '-- Select --'.");
+            return;
+        }
 
         var suggestedName = string.IsNullOrEmpty(SelectedBuild.BuildNumber)
             ? "BUILD_LOG.pdf"
