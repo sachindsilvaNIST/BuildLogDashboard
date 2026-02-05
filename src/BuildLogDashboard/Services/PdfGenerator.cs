@@ -33,7 +33,7 @@ public class PdfGenerator
             {
                 page.Size(PageSizes.A4);
                 page.Margin(50);
-                page.DefaultTextStyle(x => x.FontSize(11).FontColor(TextColor).FontFamily("Inter"));
+                page.DefaultTextStyle(x => x.FontSize(10).FontColor(TextColor).FontFamily("Inter"));
 
                 page.Header().Element(c => ComposeHeader(c, project));
                 page.Content().Element(c => ComposeContent(c, project));

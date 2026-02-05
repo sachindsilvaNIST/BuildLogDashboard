@@ -147,9 +147,9 @@ public partial class BuildProject : ObservableObject
     public bool IsReviewedByInvalid => string.IsNullOrWhiteSpace(ReviewedBy);
     public bool IsApprovedDateInvalid => !ApprovedForReleaseDate.HasValue;
 
-    // Overall validation check
+    // Overall validation check (Build Type validated separately via popup)
     public bool HasValidationErrors => IsBuildNumberInvalid || IsDeviceInvalid || IsAndroidVersionInvalid ||
-                                       IsBuildTypeInvalid || IsBootTestInvalid || IsBasicFunctionalityInvalid ||
+                                       IsBootTestInvalid || IsBasicFunctionalityInvalid ||
                                        IsOtaTestInvalid || IsRecommendedForInvalid || IsBuiltByInvalid ||
                                        IsReviewedByInvalid || IsApprovedDateInvalid;
 
