@@ -18,6 +18,9 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly HtmlGenerator _htmlGenerator;
     private readonly PdfGenerator _pdfGenerator;
 
+    // Default starting directory for file dialogs
+    private const string DefaultStartDirectory = "/home/sankyo/Sachin Files/01 NIST - AEM979/NIST - Resources (ALL) [NIST - RESOURCE &  PERMISSION/GPN600-001 RESOURCES/[GPN600-001] Android Images";
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasWorkspaceLoaded))]
     private string _workspacePath = string.Empty;
@@ -164,10 +167,13 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         if (StorageProvider == null) return;
 
+        var startFolder = await StorageProvider.TryGetFolderFromPathAsync(DefaultStartDirectory);
+
         var folders = await StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
         {
             Title = "Select Android Image Workspace",
-            AllowMultiple = false
+            AllowMultiple = false,
+            SuggestedStartLocation = startFolder
         });
 
         if (folders.Count > 0)
@@ -416,10 +422,13 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         if (StorageProvider == null) return;
 
+        var startFolder = await StorageProvider.TryGetFolderFromPathAsync(DefaultStartDirectory);
+
         var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
             Title = "Import Markdown File",
             AllowMultiple = false,
+            SuggestedStartLocation = startFolder,
             FileTypeFilter = new[]
             {
                 new FilePickerFileType("Markdown") { Patterns = new[] { "*.md" } }
@@ -502,10 +511,13 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         if (StorageProvider == null) return;
 
+        var startFolder = await StorageProvider.TryGetFolderFromPathAsync(DefaultStartDirectory);
+
         var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
             Title = "Select Markdown File to Delete",
             AllowMultiple = false,
+            SuggestedStartLocation = startFolder,
             FileTypeFilter = new[]
             {
                 new FilePickerFileType("Markdown") { Patterns = new[] { "*.md" } }
@@ -531,10 +543,13 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         if (StorageProvider == null) return;
 
+        var startFolder = await StorageProvider.TryGetFolderFromPathAsync(DefaultStartDirectory);
+
         var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
             Title = "Select HTML File to Delete",
             AllowMultiple = false,
+            SuggestedStartLocation = startFolder,
             FileTypeFilter = new[]
             {
                 new FilePickerFileType("HTML") { Patterns = new[] { "*.html" } }
@@ -560,10 +575,13 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         if (StorageProvider == null) return;
 
+        var startFolder = await StorageProvider.TryGetFolderFromPathAsync(DefaultStartDirectory);
+
         var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
             Title = "Select PDF File to Delete",
             AllowMultiple = false,
+            SuggestedStartLocation = startFolder,
             FileTypeFilter = new[]
             {
                 new FilePickerFileType("PDF") { Patterns = new[] { "*.pdf" } }

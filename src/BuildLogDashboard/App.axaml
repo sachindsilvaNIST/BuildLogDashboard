@@ -27,6 +27,11 @@
         <FluentTheme />
         <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/>
 
+        <!-- Hand cursor for all buttons -->
+        <Style Selector="Button">
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+
         <!-- Button Base Styles with Transitions -->
         <Style Selector="Button.btn-light-gray /template/ ContentPresenter">
             <Setter Property="Transitions">
