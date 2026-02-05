@@ -442,12 +442,30 @@ public partial class MainWindowViewModel : ViewModelBase
 
         var defaultFilePath = System.IO.Path.Combine(DefaultExportDirectory, suggestedName);
 
-        // Generate preview content
-        var previewContent = _projectManager.GeneratePreview(SelectedBuild);
+        // Generate PDF preview images
+        IsBusy = true;
+        BusyMessage = "Generating preview...";
+        StatusMessage = "Generating preview...";
 
-        // Show preview dialog with integrated save location
+        System.Collections.Generic.List<byte[]>? previewImages = null;
+        try
+        {
+            previewImages = await Task.Run(() => _pdfGenerator.GeneratePreviewImages(SelectedBuild));
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Preview generation failed: {ex.Message}";
+            IsBusy = false;
+            return;
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+
+        // Show preview dialog with PDF images
         var previewWindow = new Views.ExportPreviewWindow();
-        previewWindow.SetPreviewContent(previewContent, "PDF (.pdf)", defaultFilePath, ".pdf");
+        previewWindow.SetPreviewImages(previewImages, "PDF (.pdf)", defaultFilePath, ".pdf");
         await previewWindow.ShowDialog(MainWindow);
 
         if (!previewWindow.IsConfirmed)
@@ -481,13 +499,21 @@ public partial class MainWindowViewModel : ViewModelBase
                 }
                 catch (Exception pdfEx)
                 {
-                    return pdfEx.Message;
+                    // Capture full error including inner exception
+                    var errorMsg = pdfEx.Message;
+                    if (pdfEx.InnerException != null)
+                    {
+                        errorMsg += $" | Inner: {pdfEx.InnerException.Message}";
+                    }
+                    // Also log to console for debugging
+                    Console.WriteLine($"PDF Error: {pdfEx}");
+                    return errorMsg;
                 }
             });
 
             if (pdfError != null)
             {
-                StatusMessage = $"PDF generation failed: {pdfError}";
+                StatusMessage = $"PDF failed: {pdfError}";
                 return;
             }
 

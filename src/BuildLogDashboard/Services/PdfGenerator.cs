@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using BuildLogDashboard.Models;
 using QuestPDF.Fluent;
@@ -24,21 +25,59 @@ public class PdfGenerator
         QuestPDF.Settings.License = LicenseType.Community;
     }
 
-    public void Generate(BuildProject project, string filePath)
+    private IDocument CreateDocument(BuildProject project)
     {
-        Document.Create(container =>
+        return Document.Create(container =>
         {
             container.Page(page =>
             {
                 page.Size(PageSizes.A4);
                 page.Margin(50);
-                page.DefaultTextStyle(x => x.FontSize(11).FontColor(TextColor).FontFamily("Inter"));
+                page.DefaultTextStyle(x => x.FontSize(11).FontColor(TextColor));
 
                 page.Header().Element(c => ComposeHeader(c, project));
                 page.Content().Element(c => ComposeContent(c, project));
                 page.Footer().Element(c => ComposeFooter(c, project));
             });
-        }).GeneratePdf(filePath);
+        });
+    }
+
+    public void Generate(BuildProject project, string filePath)
+    {
+        try
+        {
+            CreateDocument(project).GeneratePdf(filePath);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"PDF generation error: {ex.Message}", ex);
+        }
+    }
+
+    /// <summary>
+    /// Generates preview images of the PDF pages
+    /// </summary>
+    /// <param name="project">The build project to preview</param>
+    /// <param name="dpi">Resolution for the preview images (default 150 for good balance of quality/performance)</param>
+    /// <returns>List of PNG image bytes for each page</returns>
+    public List<byte[]> GeneratePreviewImages(BuildProject project, int dpi = 150)
+    {
+        try
+        {
+            var images = new List<byte[]>();
+            var document = CreateDocument(project);
+
+            foreach (var imageBytes in document.GenerateImages(new ImageGenerationSettings { ImageFormat = ImageFormat.Png, RasterDpi = dpi }))
+            {
+                images.Add(imageBytes);
+            }
+
+            return images;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"PDF preview generation error: {ex.Message}", ex);
+        }
     }
 
     private void ComposeHeader(IContainer container, BuildProject project)

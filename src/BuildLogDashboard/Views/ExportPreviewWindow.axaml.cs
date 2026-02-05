@@ -1,7 +1,9 @@
 using System;
-using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.IO;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
 
 namespace BuildLogDashboard.Views;
@@ -20,14 +22,62 @@ public partial class ExportPreviewWindow : Window
         InitializeComponent();
     }
 
-    public void SetPreviewContent(string markdownContent, string exportType, string defaultFilePath, string fileExtension)
+    /// <summary>
+    /// Sets the preview content using PDF page images
+    /// </summary>
+    public void SetPreviewImages(List<byte[]> pageImages, string exportType, string defaultFilePath, string fileExtension)
     {
-        PreviewMarkdown.Markdown = markdownContent;
         ExportTypeText.Text = $"Exporting as {exportType}";
         FilePathTextBox.Text = defaultFilePath;
         _exportType = exportType;
         _fileExtension = fileExtension;
         _storageProvider = this.StorageProvider;
+
+        // Convert byte arrays to Bitmaps and display
+        var bitmaps = new List<Bitmap>();
+        foreach (var imageBytes in pageImages)
+        {
+            using var stream = new MemoryStream(imageBytes);
+            var bitmap = new Bitmap(stream);
+            bitmaps.Add(bitmap);
+        }
+
+        PagesContainer.ItemsSource = bitmaps;
+        PageCountText.Text = $"{bitmaps.Count} page{(bitmaps.Count != 1 ? "s" : "")}";
+    }
+
+    /// <summary>
+    /// Sets the preview content using plain text (fallback for non-PDF exports)
+    /// </summary>
+    public void SetPreviewContent(string markdownContent, string exportType, string defaultFilePath, string fileExtension)
+    {
+        ExportTypeText.Text = $"Exporting as {exportType}";
+        FilePathTextBox.Text = defaultFilePath;
+        _exportType = exportType;
+        _fileExtension = fileExtension;
+        _storageProvider = this.StorageProvider;
+
+        // For text preview, create a simple text display
+        var textBlock = new TextBlock
+        {
+            Text = markdownContent,
+            TextWrapping = Avalonia.Media.TextWrapping.Wrap,
+            FontFamily = new Avalonia.Media.FontFamily("Consolas, Monaco, monospace"),
+            FontSize = 12,
+            Margin = new Avalonia.Thickness(20)
+        };
+
+        var border = new Border
+        {
+            Background = Avalonia.Media.Brushes.White,
+            CornerRadius = new Avalonia.CornerRadius(4),
+            Margin = new Avalonia.Thickness(20, 8),
+            Padding = new Avalonia.Thickness(20),
+            Child = textBlock
+        };
+
+        PagesContainer.ItemsSource = new List<Border> { border };
+        PageCountText.Text = "Text Preview";
     }
 
     private async void OnBrowseClick(object? sender, RoutedEventArgs e)
@@ -36,7 +86,6 @@ public partial class ExportPreviewWindow : Window
 
         try
         {
-            // Try to get the directory from current path
             var currentPath = FilePathTextBox.Text ?? string.Empty;
             var directory = System.IO.Path.GetDirectoryName(currentPath);
             var fileName = System.IO.Path.GetFileName(currentPath);
@@ -75,7 +124,6 @@ public partial class ExportPreviewWindow : Window
 
     private void OnConfirmClick(object? sender, RoutedEventArgs e)
     {
-        // Validate file path
         var filePath = FilePathTextBox.Text?.Trim();
         if (string.IsNullOrEmpty(filePath))
         {
@@ -84,7 +132,6 @@ public partial class ExportPreviewWindow : Window
             return;
         }
 
-        // Ensure directory exists
         var directory = System.IO.Path.GetDirectoryName(filePath);
         if (!string.IsNullOrEmpty(directory) && !System.IO.Directory.Exists(directory))
         {

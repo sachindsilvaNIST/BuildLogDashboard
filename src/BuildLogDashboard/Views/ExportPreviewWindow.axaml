@@ -1,13 +1,59 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:md="clr-namespace:Markdown.Avalonia;assembly=Markdown.Avalonia"
         x:Class="BuildLogDashboard.Views.ExportPreviewWindow"
         Title="Export Preview"
-        Width="900" Height="750"
+        Width="900" Height="800"
         WindowStartupLocation="CenterOwner"
         CanResize="True"
         MinWidth="700" MinHeight="550"
         Background="#F5F5F7">
+
+    <Window.Styles>
+        <!-- Button hover animations for Browse button -->
+        <Style Selector="Button.btn-blue /template/ ContentPresenter">
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.15"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Button.btn-blue /template/ ContentPresenter">
+            <Setter Property="Background" Value="#007AFF"/>
+        </Style>
+        <Style Selector="Button.btn-blue:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#0056b3"/>
+        </Style>
+
+        <!-- Button hover animations for Confirm button -->
+        <Style Selector="Button.btn-confirm /template/ ContentPresenter">
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.15"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Button.btn-confirm /template/ ContentPresenter">
+            <Setter Property="Background" Value="#107C10"/>
+        </Style>
+        <Style Selector="Button.btn-confirm:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#0b5c0b"/>
+        </Style>
+
+        <!-- Button hover animations for Cancel button -->
+        <Style Selector="Button.btn-cancel /template/ ContentPresenter">
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.15"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Button.btn-cancel /template/ ContentPresenter">
+            <Setter Property="Background" Value="#D13438"/>
+        </Style>
+        <Style Selector="Button.btn-cancel:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#a02528"/>
+        </Style>
+    </Window.Styles>
 
     <Grid RowDefinitions="Auto,*,Auto,Auto">
         <!-- Header -->
@@ -16,29 +62,53 @@
                 BorderBrush="#E0E0E0"
                 BorderThickness="0,0,0,1"
                 Padding="20,16">
-            <StackPanel>
-                <TextBlock Text="Export Preview"
-                           FontSize="20"
-                           FontWeight="SemiBold"
-                           Foreground="#1A1A1A"/>
-                <TextBlock x:Name="ExportTypeText"
-                           Text="Review before exporting"
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="Export Preview"
+                               FontSize="20"
+                               FontWeight="SemiBold"
+                               Foreground="#1A1A1A"/>
+                    <TextBlock x:Name="ExportTypeText"
+                               Text="Review before exporting"
+                               FontSize="13"
+                               Foreground="#666666"
+                               Margin="0,4,0,0"/>
+                </StackPanel>
+                <TextBlock Grid.Column="1"
+                           x:Name="PageCountText"
+                           Text=""
                            FontSize="13"
                            Foreground="#666666"
-                           Margin="0,4,0,0"/>
-            </StackPanel>
+                           VerticalAlignment="Center"/>
+            </Grid>
         </Border>
 
-        <!-- Preview Content -->
-        <Border Grid.Row="1" Margin="20,16,20,8">
-            <Border Background="White"
-                    CornerRadius="8"
-                    BoxShadow="0 2 12 0 #20000000">
-                <ScrollViewer Padding="32,24">
-                    <md:MarkdownScrollViewer x:Name="PreviewMarkdown"
-                                             SaveScrollValueWhenContentUpdated="True"/>
-                </ScrollViewer>
-            </Border>
+        <!-- Preview Content - PDF Pages -->
+        <Border Grid.Row="1" Margin="20,16,20,8" Background="#E8E8E8" CornerRadius="8">
+            <ScrollViewer x:Name="PreviewScrollViewer"
+                          HorizontalScrollBarVisibility="Disabled"
+                          VerticalScrollBarVisibility="Auto">
+                <ItemsControl x:Name="PagesContainer">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Vertical" Spacing="16"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Background="White"
+                                    CornerRadius="4"
+                                    BoxShadow="0 2 8 0 #30000000"
+                                    Margin="20,8"
+                                    HorizontalAlignment="Center">
+                                <Image Source="{Binding}"
+                                       Stretch="Uniform"
+                                       MaxWidth="700"/>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
         </Border>
 
         <!-- Save Location Section -->
@@ -67,6 +137,7 @@
                         Content="Browse..."
                         Padding="16,8"
                         Margin="12,0,0,0"
+                        Classes="btn-blue"
                         Background="#007AFF"
                         Foreground="White"
                         CornerRadius="6"
@@ -92,6 +163,7 @@
                         Content="Cancel"
                         Padding="24,10"
                         Margin="0,0,12,0"
+                        Classes="btn-cancel"
                         Background="#D13438"
                         Foreground="White"
                         CornerRadius="6"
@@ -100,6 +172,7 @@
                         x:Name="ConfirmButton"
                         Content="Confirm Export"
                         Padding="24,10"
+                        Classes="btn-confirm"
                         Background="#107C10"
                         Foreground="White"
                         CornerRadius="6"
