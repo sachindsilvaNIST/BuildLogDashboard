@@ -10,8 +10,7 @@
         x:DataType="vm:MainWindowViewModel"
         Title="Android OS Image Build Log Dashboard"
         Width="1400" Height="900"
-        MinWidth="1200" MinHeight="700"
-        CanResize="True"
+        CanResize="False"
         Background="{StaticResource GlassBackgroundBrush}">
 
     <Design.DataContext>
@@ -475,8 +474,8 @@
                                                       CornerRadius="4"
                                                       IsReadOnly="True">
                                                 <DataGrid.Columns>
-                                                    <DataGridTextColumn Header="File Name" Binding="{Binding FileName}" Width="*"/>
-                                                    <DataGridTextColumn Header="Size" Binding="{Binding FileSize}" Width="120"/>
+                                                    <DataGridTextColumn Header="File Name" Binding="{Binding FileName}" Width="250"/>
+                                                    <DataGridTextColumn Header="Size" Binding="{Binding FileSize}" Width="80"/>
                                                     <DataGridTextColumn Header="SHA256" Binding="{Binding Sha256}" Width="*"/>
                                                 </DataGrid.Columns>
                                             </DataGrid>
