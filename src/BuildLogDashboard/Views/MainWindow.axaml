@@ -503,7 +503,7 @@
                                                     <DataGridTextColumn Header="Path" Binding="{Binding Path}" Width="*"/>
                                                     <DataGridTextColumn Header="Version" Binding="{Binding Version}" Width="80"/>
                                                     <DataGridTextColumn Header="Changes" Binding="{Binding Changes}" Width="*"/>
-                                                    <DataGridTemplateColumn Header="" Width="40">
+                                                    <DataGridTemplateColumn Header="" Width="40" CanUserResize="False" CanUserReorder="False">
                                                         <DataGridTemplateColumn.CellTemplate>
                                                             <DataTemplate>
                                                                 <Button Command="{Binding $parent[DataGrid].((vm:MainWindowViewModel)DataContext).RemoveAppUpdateCommand}"
