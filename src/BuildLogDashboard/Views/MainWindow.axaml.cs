@@ -1,4 +1,6 @@
 using Avalonia.Controls;
+using Avalonia.Input;
+using BuildLogDashboard.Models;
 using BuildLogDashboard.ViewModels;
 
 namespace BuildLogDashboard.Views;
@@ -18,5 +20,15 @@ public partial class MainWindow : Window
                 vm.MainWindow = this;
             }
         };
+    }
+
+    private void OnAppUpdateDoubleTapped(object? sender, TappedEventArgs e)
+    {
+        if (sender is DataGrid dataGrid
+            && dataGrid.SelectedItem is AppUpdate appUpdate
+            && DataContext is MainWindowViewModel vm)
+        {
+            vm.EditAppUpdateCommand.Execute(appUpdate);
+        }
     }
 }

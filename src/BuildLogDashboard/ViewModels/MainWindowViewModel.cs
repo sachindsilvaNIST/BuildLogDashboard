@@ -7,8 +7,10 @@ using System.Threading.Tasks;
 using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Avalonia.Controls;
 using BuildLogDashboard.Models;
 using BuildLogDashboard.Services;
+using BuildLogDashboard.Views;
 
 namespace BuildLogDashboard.ViewModels;
 
@@ -763,15 +765,40 @@ public partial class MainWindowViewModel : ViewModelBase
 
     // App Updates
     [RelayCommand]
-    private void AddAppUpdate()
+    private async Task AddAppUpdate()
     {
-        SelectedBuild?.AppUpdates.Add(new AppUpdate
+        if (SelectedBuild == null || MainWindow == null) return;
+
+        var dialog = new AppUpdateDialog();
+        await dialog.ShowDialog(MainWindow);
+
+        if (dialog.IsConfirmed)
         {
-            AppName = "New App",
-            Path = "packages/apps/",
-            Version = "1.0.0",
-            Changes = "Description"
-        });
+            SelectedBuild.AppUpdates.Add(new AppUpdate
+            {
+                AppName = dialog.AppName,
+                Path = dialog.AppPath,
+                Version = dialog.AppVersion,
+                Changes = dialog.AppChanges
+            });
+        }
+    }
+
+    [RelayCommand]
+    private async Task EditAppUpdate(AppUpdate? appUpdate)
+    {
+        if (appUpdate == null || MainWindow == null) return;
+
+        var dialog = new AppUpdateDialog(appUpdate.AppName, appUpdate.Path, appUpdate.Version, appUpdate.Changes);
+        await dialog.ShowDialog(MainWindow);
+
+        if (dialog.IsConfirmed)
+        {
+            appUpdate.AppName = dialog.AppName;
+            appUpdate.Path = dialog.AppPath;
+            appUpdate.Version = dialog.AppVersion;
+            appUpdate.Changes = dialog.AppChanges;
+        }
     }
 
     [RelayCommand]

@@ -497,30 +497,26 @@
                                                       BorderThickness="1"
                                                       BorderBrush="{StaticResource GlassBorderBrush}"
                                                       CornerRadius="4"
-                                                      MaxHeight="250">
+                                                      MaxHeight="250"
+                                                      IsReadOnly="True"
+                                                      DoubleTapped="OnAppUpdateDoubleTapped">
                                                 <DataGrid.Columns>
                                                     <DataGridTextColumn Header="App Name" Binding="{Binding AppName}" Width="150"/>
                                                     <DataGridTextColumn Header="Path" Binding="{Binding Path}" Width="*"/>
                                                     <DataGridTextColumn Header="Version" Binding="{Binding Version}" Width="80"/>
-                                                    <DataGridTemplateColumn Header="Changes" Width="*" CanUserReorder="False">
+                                                    <DataGridTextColumn Header="Changes" Binding="{Binding Changes}" Width="*"/>
+                                                    <DataGridTemplateColumn Header="" Width="40" CanUserResize="False" CanUserReorder="False">
                                                         <DataGridTemplateColumn.CellTemplate>
                                                             <DataTemplate>
-                                                                <Grid ColumnDefinitions="*,Auto">
-                                                                    <TextBox Grid.Column="0" Text="{Binding Changes}"
-                                                                             BorderThickness="0" Background="Transparent"
-                                                                             VerticalAlignment="Center" Padding="8,0"/>
-                                                                    <Button Grid.Column="1"
-                                                                            Command="{Binding $parent[DataGrid].((vm:MainWindowViewModel)DataContext).RemoveAppUpdateCommand}"
-                                                                            CommandParameter="{Binding}"
-                                                                            Padding="4"
-                                                                            Background="Transparent"
-                                                                            ToolTip.Tip="Delete"
-                                                                            VerticalAlignment="Center">
-                                                                        <PathIcon Data="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"
-                                                                                  Width="14" Height="14"
-                                                                                  Foreground="{StaticResource GlassErrorColor}"/>
-                                                                    </Button>
-                                                                </Grid>
+                                                                <Button Command="{Binding $parent[DataGrid].((vm:MainWindowViewModel)DataContext).RemoveAppUpdateCommand}"
+                                                                        CommandParameter="{Binding}"
+                                                                        Padding="4"
+                                                                        Background="Transparent"
+                                                                        ToolTip.Tip="Delete">
+                                                                    <PathIcon Data="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"
+                                                                              Width="14" Height="14"
+                                                                              Foreground="{StaticResource GlassErrorColor}"/>
+                                                                </Button>
                                                             </DataTemplate>
                                                         </DataGridTemplateColumn.CellTemplate>
                                                     </DataGridTemplateColumn>
