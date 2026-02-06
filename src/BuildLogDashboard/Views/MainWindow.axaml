@@ -143,7 +143,6 @@
                     <TextBlock Text="{Binding WorkspacePath}"
                                Foreground="{StaticResource GlassSubtleTextBrush}"
                                FontSize="12"
-                               MaxWidth="300"
                                TextTrimming="CharacterEllipsis"/>
                 </Border>
 
@@ -504,7 +503,6 @@
                                                     <DataGridTextColumn Header="Path" Binding="{Binding Path}" Width="*"/>
                                                     <DataGridTextColumn Header="Version" Binding="{Binding Version}" Width="80"/>
                                                     <DataGridTextColumn Header="Changes" Binding="{Binding Changes}" Width="*"/>
-                                                    <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*"/>
                                                     <DataGridTemplateColumn Header="" Width="40">
                                                         <DataGridTemplateColumn.CellTemplate>
                                                             <DataTemplate>

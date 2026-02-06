@@ -18,9 +18,6 @@ public partial class AppUpdate : ObservableObject
     private string _changes = string.Empty;
 
     [ObservableProperty]
-    private string _description = string.Empty;
-
-    [ObservableProperty]
     private ObservableCollection<string> _details = new();
 
     public AppUpdate() { }

@@ -210,9 +210,6 @@ public class MarkdownParser
             Changes = CleanCellContent(cells[3])
         };
 
-        if (cells.Count >= 5)
-            appUpdate.Description = CleanCellContent(cells[4]);
-
         project.AppUpdates.Add(appUpdate);
     }
 
